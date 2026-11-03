@@ -55,6 +55,11 @@ def build_tokenizer(train_texts: List[str], max_vocab_size: int) -> Tokenizer:
     Index 1 is the OOV token '<OOV>'.
     Indices 2 … max_vocab_size are real vocabulary tokens.
 
+    Note: the Keras default `filters` are used, so most punctuation
+    (!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~) is stripped at tokenisation time even
+    though clean_text() preserves it.  '£', apostrophes and digits are kept.
+    Kept unchanged so results stay reproducible; see docs/metodologia.md §3.1.
+
     Args:
         train_texts   : list of cleaned training texts.
         max_vocab_size: maximum vocabulary size (num_words parameter).

@@ -58,10 +58,12 @@ A regra 2 é aplicada primeiro. As mensagens removidas são registadas no relat�
 |---------------|----------|---------------|
 | Lowercase | ✓ | Normalização sem perda de sinal |
 | Remoção de números | ✗ | Valores monetários e códigos curtos são sinal de spam |
-| Remoção de pontuação | ✗ | Exclamações e reticências são sinal de spam |
-| Remoção de URLs | ✗ | URLs de promoções são sinal de spam |
-| Remoção de caracteres especiais | ✗ | "£", "@", "$" têm valor discriminativo |
+| Remoção de pontuação | ✓ (parcial, pelo tokenizador) | Ver nota abaixo |
+| Remoção de URLs | ✗ (fragmentadas) | `http://x.com` vira os tokens `http`, `x`, `com` |
+| Remoção de caracteres especiais | parcial | `£` e `'` são mantidos; `$`, `@`, `!` etc. são removidos |
 | Stemming / lematização | ✗ | Complexidade desnecessária para este estudo |
+
+> **Nota (comportamento efetivo):** `clean_text` aplica apenas lowercase, mas o `Tokenizer` do Keras é criado com o filtro padrão (`filters='!"#$%&()*+,-./:;<=>?@[\]^_\`{|}~\t\n'`), que remove esses caracteres ao tokenizar. Assim, a intenção original de preservar pontuação **não** foi efetivada nos experimentos da campanha `campaign_full_30`. Isso afeta igualmente os dois cenários, portanto não compromete a comparação, mas é registrado como limitação. Para preservar pontuação em estudos futuros, usar `Tokenizer(filters='', ...)` com uma tokenização que separe a pontuação das palavras.
 
 ### 3.2 Tokenização
 
