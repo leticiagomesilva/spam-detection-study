@@ -1,0 +1,80 @@
+# Experiment configuration
+# All adjustments must use only training and validation data.
+# Test set is reserved exclusively for final evaluation.
+
+split:
+  seed: 42
+  train_ratio: 0.70
+  val_ratio: 0.15
+  test_ratio: 0.15
+
+preprocessing:
+  max_vocab_size: 10000
+  max_length: 100
+
+model:
+  embedding_dim: 64
+  lstm_units: 64
+  attention_dim: 64   # used only by additive attention
+  dropout_rate: 0.2
+
+training:
+  # 30 seeds defining the 30 paired experiments
+  seeds:
+    - 1001
+    - 1002
+    - 1003
+    - 1004
+    - 1005
+    - 1006
+    - 1007
+    - 1008
+    - 1009
+    - 1010
+    - 1011
+    - 1012
+    - 1013
+    - 1014
+    - 1015
+    - 1016
+    - 1017
+    - 1018
+    - 1019
+    - 1020
+    - 1021
+    - 1022
+    - 1023
+    - 1024
+    - 1025
+    - 1026
+    - 1027
+    - 1028
+    - 1029
+    - 1030
+  batch_size: 32
+  max_epochs: 20
+  optimizer: adam
+  learning_rate: 0.001
+  loss: binary_crossentropy
+  early_stopping:
+    monitor: val_loss
+    patience: 3
+    restore_best_weights: true
+  # Class weights: set to null to disable (not applied by default).
+  # If enabled, set to "balanced" or provide a dict {0: w0, 1: w1}.
+  class_weight: null
+
+evaluation:
+  threshold: 0.5
+
+statistical_analysis:
+  significance_level: 0.05
+  n_permutations: 10000
+  bootstrap_n_samples: 10000
+  bootstrap_ci: 0.95
+  seed: 42
+
+# Pilot mode settings (for quick verification before full campaign)
+pilot:
+  n_pairs: 3
+  max_epochs: 5

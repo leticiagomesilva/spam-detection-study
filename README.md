@@ -70,3 +70,96 @@ Não rejeitar H₀ não será interpretado como comprovação de equivalência e
 - Gráficos comparativos e análise estatística.
 - Apresentação do estudo.
 - Relatório em formato IEEE de duas colunas.
+
+---
+
+## Instalação
+
+```bash
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+Requer Python 3.11.
+
+## Uso
+
+### 1. Verificar os dados
+
+O arquivo `data/raw/SMSSpamCollection` já está incluído no repositório.
+Para registar o hash e recriar os metadados:
+
+```bash
+python scripts/download_data.py --skip-download
+```
+
+### 2. Exploração (notebook)
+
+```bash
+jupyter notebook notebooks/exploracao.ipynb
+```
+
+### 3. Executar os testes
+
+```bash
+pytest tests/ -v
+```
+
+### 4. Verificação rápida (1 par, smoke test)
+
+```bash
+python scripts/run_experiments.py --mode single
+```
+
+### 5. Piloto (3 pares, 5 épocas máximas)
+
+```bash
+python scripts/run_experiments.py --mode pilot
+```
+
+### 6. Campanha completa (30 pares, 60 treinamentos)
+
+```bash
+python scripts/run_experiments.py --mode full
+```
+
+> **Atenção:** a campanha completa não é executada automaticamente. Execute o comando acima explicitamente quando estiver pronto para realizar os experimentos.
+
+### 7. Análise estatística (após campanha)
+
+```bash
+python scripts/analyze_results.py --run-id <RUN_ID>
+```
+
+O `RUN_ID` é exibido durante a execução e está em `results/campaigns/`.
+
+## Estrutura do Projeto
+
+```text
+spam-detection-study/
+├── configs/experiment.yaml      # Configuração centralizada
+├── data/raw/SMSSpamCollection   # Dataset bruto (UCI)
+├── data/processed/              # Dados processados (gerados)
+├── src/
+│   ├── data.py                  # Carregamento e divisão dos dados
+│   ├── preprocessing.py         # Tokenização e codificação
+│   ├── train.py                 # Protocolo de treino pareado
+│   ├── evaluate.py              # Métricas e persistência
+│   ├── predict.py               # Inferência em novos textos
+│   └── models/
+│       ├── attention.py         # AdditiveAttention, ScaledDotProductAttention
+│       └── classifier.py        # SpamClassifier (construtor configurável)
+├── scripts/
+│   ├── download_data.py         # Download e verificação do dataset
+│   ├── run_experiments.py       # Runner de experimentos
+│   └── analyze_results.py      # Análise estatística
+├── tests/                       # Testes unitários (pytest)
+├── notebooks/exploracao.ipynb   # EDA do dataset
+├── docs/metodologia.md          # Decisões metodológicas detalhadas
+└── results/                     # Resultados gerados pelos experimentos
+```
+
+## Pendências Académicas
+
+> A aceitação de **embeddings treináveis** como técnica separada (distinta da LSTM) ainda precisa ser confirmada com a professora da disciplina. Veja `docs/metodologia.md` para detalhes.
