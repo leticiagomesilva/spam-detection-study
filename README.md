@@ -20,8 +20,6 @@ Os dois cenários utilizarão embeddings e uma rede LSTM, alterando o mecanismo 
 - **LSTM:** processa a sequência de palavras para identificar padrões relevantes à classificação.
 - **Atenção:** atribui pesos às representações da sequência para construir a representação utilizada na classificação.
 
-> A combinação de técnicas está em planejamento e depende da validação dos requisitos da disciplina.
-
 ## Base de dados
 
 A base inicialmente proposta é a [SMS Spam Collection, disponibilizada pela UCI](https://archive.ics.uci.edu/dataset/228/sms+spam+collection), composta por mensagens em inglês classificadas como:
