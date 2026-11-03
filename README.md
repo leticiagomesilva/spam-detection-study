@@ -70,7 +70,3 @@ Não rejeitar H₀ não será interpretado como comprovação de equivalência e
 - Gráficos comparativos e análise estatística.
 - Apresentação do estudo.
 - Relatório em formato IEEE de duas colunas.
-
-## Status
-
-Em planejamento. As instruções de instalação e execução serão adicionadas conforme a implementação do projeto.
