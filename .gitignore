@@ -24,14 +24,13 @@ env/
 *.swp
 *.swo
 
-# Generated results (produced by experiment runs)
-results/metrics.csv
-results/statistical_analysis.json
-results/figures/*
-!results/figures/.gitkeep
+# Generated results
+# Versioned (small, part of the deliverable): results/metrics.csv,
+# results/statistical_analysis.json, results/figures/, results/campaigns/
+# (manifest + per-epoch histories).  Ignored (large or noisy):
 results/predictions/*
 !results/predictions/.gitkeep
-results/campaigns/
+results/*.log
 
 # Checkpoints (large binary files)
 checkpoints/*

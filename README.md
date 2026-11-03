@@ -59,7 +59,7 @@ Também serão analisados:
 - **H₀ — Hipótese nula:** não há diferença no desempenho esperado, medido pelo F1-score da classe spam, entre as abordagens.
 - **H₁ — Hipótese alternativa:** há diferença no desempenho esperado entre as abordagens.
 
-O teste estatístico será definido conforme o desenho experimental e suas condições de aplicação. A análise considerará também a magnitude da diferença e suas implicações práticas.
+Procedimento: Shapiro-Wilk nas diferenças pareadas → **teste t pareado** (se normal) ou **Wilcoxon** (caso contrário), com α = 0,05. Teste de permutação e IC bootstrap servem como verificação de robustez; o tamanho de efeito é dado pelo d de Cohen (d_z). Detalhes em `docs/metodologia.md` (seção 8). A análise considerará também a magnitude da diferença e suas implicações práticas.
 
 Não rejeitar H₀ não será interpretado como comprovação de equivalência entre as abordagens.
 
@@ -132,7 +132,15 @@ python scripts/run_experiments.py --mode full
 python scripts/analyze_results.py --run-id <RUN_ID>
 ```
 
-O `RUN_ID` é exibido durante a execução e está em `results/campaigns/`.
+O `RUN_ID` é exibido durante a execução e está em `results/campaigns/`. A campanha oficial do estudo é `campaign_full_30`.
+
+### 8. Figuras para o relatório e slides
+
+```bash
+python scripts/make_report_figures.py --run-id campaign_full_30
+```
+
+Gera PDF (vetorial, para o LaTeX) e PNG (300 dpi, para os slides) em `results/figures/<RUN_ID>/report/`. O mapa de atenção precisa dos checkpoints locais (não versionados); sem eles, use `--no-attention`.
 
 ## Estrutura do Projeto
 
@@ -147,19 +155,21 @@ spam-detection-study/
 │   ├── train.py                 # Protocolo de treino pareado
 │   ├── evaluate.py              # Métricas e persistência
 │   ├── predict.py               # Inferência em novos textos
+│   ├── stat_tests.py            # Testes estatísticos pareados
 │   └── models/
 │       ├── attention.py         # AdditiveAttention, ScaledDotProductAttention
 │       └── classifier.py        # SpamClassifier (construtor configurável)
 ├── scripts/
 │   ├── download_data.py         # Download e verificação do dataset
 │   ├── run_experiments.py       # Runner de experimentos
-│   └── analyze_results.py      # Análise estatística
+│   ├── analyze_results.py       # Análise estatística
+│   └── make_report_figures.py   # Figuras do relatório IEEE
 ├── tests/                       # Testes unitários (pytest)
 ├── notebooks/exploracao.ipynb   # EDA do dataset
 ├── docs/metodologia.md          # Decisões metodológicas detalhadas
 └── results/                     # Resultados gerados pelos experimentos
 ```
 
-## Pendências Académicas
+## Técnicas do Estudo
 
-> A aceitação de **embeddings treináveis** como técnica separada (distinta da LSTM) ainda precisa ser confirmada com a professora da disciplina. Veja `docs/metodologia.md` para detalhes.
+As três técnicas obrigatórias são **Embeddings treináveis (A)**, **LSTM (B)** e **Atenção (C)**. A aceitação de embeddings como técnica separada da LSTM foi confirmada com a professora da disciplina em 03/11/2026.

@@ -1,0 +1,538 @@
+{
+  "run_id": "campaign_full_30",
+  "n_pairs": 30,
+  "seeds": [
+    1001,
+    1002,
+    1003,
+    1004,
+    1005,
+    1006,
+    1007,
+    1008,
+    1009,
+    1010,
+    1011,
+    1012,
+    1013,
+    1014,
+    1015,
+    1016,
+    1017,
+    1018,
+    1019,
+    1020,
+    1021,
+    1022,
+    1023,
+    1024,
+    1025,
+    1026,
+    1027,
+    1028,
+    1029,
+    1030
+  ],
+  "hypotheses": {
+    "H0": "E[F1_additive - F1_scaled_dot_product] = 0",
+    "H1": "E[F1_additive - F1_scaled_dot_product] != 0"
+  },
+  "primary_metric": "f1_spam",
+  "primary": {
+    "definition": "d_i = additive_i - scaled_dot_product_i",
+    "n_pairs": 30,
+    "higher_is_better": true,
+    "descriptive": {
+      "additive": {
+        "mean": 0.9390499527382764,
+        "std": 0.010330810093536804,
+        "median": 0.9390847247990105,
+        "min": 0.916256157635468,
+        "max": 0.9547738693467336
+      },
+      "scaled_dot_product": {
+        "mean": 0.9373038495491077,
+        "std": 0.007798887129069234,
+        "median": 0.9387755102040816,
+        "min": 0.92,
+        "max": 0.953846153846154
+      },
+      "difference": {
+        "mean": 0.0017461031891689016,
+        "std": 0.013410110636376017,
+        "median": 0.005043932613229052,
+        "min": -0.027016885553471037,
+        "max": 0.030456852791878264
+      }
+    },
+    "normality": {
+      "test": "Shapiro-Wilk",
+      "statistic": 0.9794273653346072,
+      "p_value": 0.8101287560107847,
+      "normal_at_alpha": true
+    },
+    "paired_t_test": {
+      "test": "paired t-test",
+      "statistic": 0.7131783848563179,
+      "p_value": 0.4814354201958787,
+      "df": 29,
+      "ci_lower": -0.003261314417058971,
+      "ci_upper": 0.006753520795396774,
+      "ci_level": 0.95
+    },
+    "wilcoxon": {
+      "test": "Wilcoxon signed-rank",
+      "statistic": 201.5,
+      "p_value": 0.5425279382616282,
+      "n_nonzero": 30,
+      "n_zero_discarded": 0
+    },
+    "permutation_test": {
+      "test": "paired sign-flip permutation test",
+      "observed_mean_difference": 0.0017461031891689016,
+      "p_value": 0.4745,
+      "n_permutations": 10000
+    },
+    "bootstrap_ci": {
+      "lower": -0.0027942244786100866,
+      "upper": 0.0063862489647355195,
+      "ci_level": 0.95
+    },
+    "effect_size": {
+      "cohens_dz": 0.13020796297030202,
+      "cohens_dz_label": "negligible",
+      "rank_biserial": 0.13333333333333333
+    },
+    "decision": {
+      "alpha": 0.05,
+      "selected_test": "paired t-test",
+      "selection_rule": "Shapiro-Wilk p >= alpha -> paired t-test; otherwise Wilcoxon",
+      "p_value": 0.4814354201958787,
+      "reject_h0": false,
+      "conclusion": "Fail to reject H0",
+      "better_scenario": null,
+      "permutation_agrees": true
+    },
+    "practical_magnitude": "negligible (< 0.005 F1)",
+    "differences": [
+      0.019450486262156397,
+      -0.006060606060606211,
+      0.004814233385662003,
+      0.009482580911152394,
+      0.009393939393939399,
+      0.005373134328358176,
+      -0.027016885553471037,
+      -0.006018106651316191,
+      -0.006473920400206001,
+      -0.014917642183777002,
+      -0.0018939393939394478,
+      0.0207637170624696,
+      0.014592365443586885,
+      0.010101010101010166,
+      -0.017607042817126772,
+      0.019686662543805578,
+      0.005332512946726209,
+      -0.008928571428571397,
+      0.02010050251256268,
+      0.009489069714052611,
+      0.0052736318407961,
+      0.005501842850275218,
+      -0.009393939393939399,
+      -0.0095856524427953,
+      0.005276381909547712,
+      -0.004720572559768654,
+      -0.014162436548223356,
+      -0.003611241953210942,
+      -0.012315270935960632,
+      0.030456852791878264
+    ]
+  },
+  "secondary_metrics_note": "Exploratory; same procedure; no correction for multiple comparisons.",
+  "secondary": {
+    "precision_spam": {
+      "definition": "d_i = additive_i - scaled_dot_product_i",
+      "n_pairs": 30,
+      "higher_is_better": true,
+      "descriptive": {
+        "additive": {
+          "mean": 0.9288683176974349,
+          "std": 0.02160713691157798,
+          "median": 0.9310328091632694,
+          "min": 0.8807339449541285,
+          "max": 0.968421052631579
+        },
+        "scaled_dot_product": {
+          "mean": 0.9320193768771392,
+          "std": 0.014403532141888527,
+          "median": 0.93,
+          "min": 0.9019607843137256,
+          "max": 0.9587628865979382
+        },
+        "difference": {
+          "mean": -0.0031510591797039855,
+          "std": 0.02710359446914591,
+          "median": 0.0008566533409479771,
+          "min": -0.07091241930821857,
+          "max": 0.030303030303030387
+        }
+      },
+      "normality": {
+        "test": "Shapiro-Wilk",
+        "statistic": 0.9233152075474427,
+        "p_value": 0.03272248107818386,
+        "normal_at_alpha": false
+      },
+      "paired_t_test": {
+        "test": "paired t-test",
+        "statistic": -0.636781292873286,
+        "p_value": 0.5292622658292029,
+        "df": 29,
+        "ci_lower": -0.013271707682685964,
+        "ci_upper": 0.006969589323277993,
+        "ci_level": 0.95
+      },
+      "wilcoxon": {
+        "test": "Wilcoxon signed-rank",
+        "statistic": 231.5,
+        "p_value": 1.0,
+        "n_nonzero": 30,
+        "n_zero_discarded": 0
+      },
+      "permutation_test": {
+        "test": "paired sign-flip permutation test",
+        "observed_mean_difference": -0.0031510591797039855,
+        "p_value": 0.5331,
+        "n_permutations": 10000
+      },
+      "bootstrap_ci": {
+        "lower": -0.012895722105394353,
+        "upper": 0.005870152684215632,
+        "ci_level": 0.95
+      },
+      "effect_size": {
+        "cohens_dz": -0.11625982610133415,
+        "cohens_dz_label": "negligible",
+        "rank_biserial": 0.004301075268817204
+      },
+      "decision": {
+        "alpha": 0.05,
+        "selected_test": "Wilcoxon signed-rank",
+        "selection_rule": "Shapiro-Wilk p >= alpha -> paired t-test; otherwise Wilcoxon",
+        "p_value": 1.0,
+        "reject_h0": false,
+        "conclusion": "Fail to reject H0",
+        "better_scenario": null,
+        "permutation_agrees": true
+      }
+    },
+    "recall_spam": {
+      "definition": "d_i = additive_i - scaled_dot_product_i",
+      "n_pairs": 30,
+      "higher_is_better": true,
+      "descriptive": {
+        "additive": {
+          "mean": 0.9500000000000001,
+          "std": 0.015705555212060896,
+          "median": 0.9489795918367347,
+          "min": 0.9183673469387756,
+          "max": 0.979591836734694
+        },
+        "scaled_dot_product": {
+          "mean": 0.9428571428571427,
+          "std": 0.010584058274747739,
+          "median": 0.9489795918367347,
+          "min": 0.9183673469387756,
+          "max": 0.9591836734693876
+        },
+        "difference": {
+          "mean": 0.00714285714285714,
+          "std": 0.015428783663073384,
+          "median": 0.010204081632652906,
+          "min": -0.030612244897959107,
+          "max": 0.0408163265306124
+        }
+      },
+      "normality": {
+        "test": "Shapiro-Wilk",
+        "statistic": 0.9443215380421336,
+        "p_value": 0.11893837773884319,
+        "normal_at_alpha": true
+      },
+      "paired_t_test": {
+        "test": "paired t-test",
+        "statistic": 2.5357176998620465,
+        "p_value": 0.01686915999876371,
+        "df": 29,
+        "ci_lower": 0.0013816546403524217,
+        "ci_upper": 0.012904059645361858,
+        "ci_level": 0.95
+      },
+      "wilcoxon": {
+        "test": "Wilcoxon signed-rank",
+        "statistic": 54.0,
+        "p_value": 0.03203945324770928,
+        "n_nonzero": 21,
+        "n_zero_discarded": 9
+      },
+      "permutation_test": {
+        "test": "paired sign-flip permutation test",
+        "observed_mean_difference": 0.00714285714285714,
+        "p_value": 0.0213,
+        "n_permutations": 10000
+      },
+      "bootstrap_ci": {
+        "lower": 0.001700680272108827,
+        "upper": 0.012244897959183687,
+        "ci_level": 0.95
+      },
+      "effect_size": {
+        "cohens_dz": 0.46295659455985244,
+        "cohens_dz_label": "small",
+        "rank_biserial": 0.5324675324675324
+      },
+      "decision": {
+        "alpha": 0.05,
+        "selected_test": "paired t-test",
+        "selection_rule": "Shapiro-Wilk p >= alpha -> paired t-test; otherwise Wilcoxon",
+        "p_value": 0.01686915999876371,
+        "reject_h0": true,
+        "conclusion": "Reject H0 (accept H1)",
+        "better_scenario": "additive",
+        "permutation_agrees": true
+      }
+    },
+    "accuracy": {
+      "definition": "d_i = additive_i - scaled_dot_product_i",
+      "n_pairs": 30,
+      "higher_is_better": true,
+      "descriptive": {
+        "additive": {
+          "mean": 0.9844072164948454,
+          "std": 0.002777301812954095,
+          "median": 0.9845360824742267,
+          "min": 0.9780927835051546,
+          "max": 0.98840206185567
+        },
+        "scaled_dot_product": {
+          "mean": 0.9840635738831615,
+          "std": 0.002044097152391251,
+          "median": 0.9845360824742267,
+          "min": 0.979381443298969,
+          "max": 0.98840206185567
+        },
+        "difference": {
+          "mean": 0.0003436426116838439,
+          "std": 0.0036122656345769556,
+          "median": 0.001288659793814373,
+          "min": -0.0077319587628864594,
+          "max": 0.0077319587628864594
+        }
+      },
+      "normality": {
+        "test": "Shapiro-Wilk",
+        "statistic": 0.974967128954235,
+        "p_value": 0.681760503434009,
+        "normal_at_alpha": true
+      },
+      "paired_t_test": {
+        "test": "paired t-test",
+        "statistic": 0.5210602684851353,
+        "p_value": 0.6062811777069799,
+        "df": 29,
+        "ci_lower": -0.0010051995438675836,
+        "ci_upper": 0.0016924847672352714,
+        "ci_level": 0.95
+      },
+      "wilcoxon": {
+        "test": "Wilcoxon signed-rank",
+        "statistic": 191.5,
+        "p_value": 0.5730230328290765,
+        "n_nonzero": 29,
+        "n_zero_discarded": 1
+      },
+      "permutation_test": {
+        "test": "paired sign-flip permutation test",
+        "observed_mean_difference": 0.0003436426116838439,
+        "p_value": 0.6491,
+        "n_permutations": 10000
+      },
+      "bootstrap_ci": {
+        "lower": -0.0009020618556700777,
+        "upper": 0.0015893470790377692,
+        "ci_level": 0.95
+      },
+      "effect_size": {
+        "cohens_dz": 0.09513215428966897,
+        "cohens_dz_label": "negligible",
+        "rank_biserial": 0.11954022988505747
+      },
+      "decision": {
+        "alpha": 0.05,
+        "selected_test": "paired t-test",
+        "selection_rule": "Shapiro-Wilk p >= alpha -> paired t-test; otherwise Wilcoxon",
+        "p_value": 0.6062811777069799,
+        "reject_h0": false,
+        "conclusion": "Fail to reject H0",
+        "better_scenario": null,
+        "permutation_agrees": true
+      }
+    },
+    "average_precision": {
+      "definition": "d_i = additive_i - scaled_dot_product_i",
+      "n_pairs": 30,
+      "higher_is_better": true,
+      "descriptive": {
+        "additive": {
+          "mean": 0.9816186229229531,
+          "std": 0.0027097441871637997,
+          "median": 0.9821922324914159,
+          "min": 0.9761118859987996,
+          "max": 0.9875088389496808
+        },
+        "scaled_dot_product": {
+          "mean": 0.9777335546841855,
+          "std": 0.0023147650064426024,
+          "median": 0.9781990214220968,
+          "min": 0.9728720299936257,
+          "max": 0.9814791630708724
+        },
+        "difference": {
+          "mean": 0.003885068238767549,
+          "std": 0.002970364037529917,
+          "median": 0.003391856182627273,
+          "min": -0.0019279909489583469,
+          "max": 0.009787791546917557
+        }
+      },
+      "normality": {
+        "test": "Shapiro-Wilk",
+        "statistic": 0.9617019685686464,
+        "p_value": 0.3421573346444532,
+        "normal_at_alpha": true
+      },
+      "paired_t_test": {
+        "test": "paired t-test",
+        "statistic": 7.163901410513293,
+        "p_value": 6.940162068505076e-08,
+        "df": 29,
+        "ci_lower": 0.0027759160787483106,
+        "ci_upper": 0.004994220398786787,
+        "ci_level": 0.95
+      },
+      "wilcoxon": {
+        "test": "Wilcoxon signed-rank",
+        "statistic": 11.0,
+        "p_value": 1.0244548320770264e-07,
+        "n_nonzero": 30,
+        "n_zero_discarded": 0
+      },
+      "permutation_test": {
+        "test": "paired sign-flip permutation test",
+        "observed_mean_difference": 0.003885068238767549,
+        "p_value": 0.0,
+        "n_permutations": 10000
+      },
+      "bootstrap_ci": {
+        "lower": 0.0028280062942902043,
+        "upper": 0.00492148038850986,
+        "ci_level": 0.95
+      },
+      "effect_size": {
+        "cohens_dz": 1.3079434674270691,
+        "cohens_dz_label": "large",
+        "rank_biserial": 0.9526881720430107
+      },
+      "decision": {
+        "alpha": 0.05,
+        "selected_test": "paired t-test",
+        "selection_rule": "Shapiro-Wilk p >= alpha -> paired t-test; otherwise Wilcoxon",
+        "p_value": 6.940162068505076e-08,
+        "reject_h0": true,
+        "conclusion": "Reject H0 (accept H1)",
+        "better_scenario": "additive",
+        "permutation_agrees": true
+      }
+    },
+    "train_time_s": {
+      "definition": "d_i = additive_i - scaled_dot_product_i",
+      "n_pairs": 30,
+      "higher_is_better": false,
+      "descriptive": {
+        "additive": {
+          "mean": 28.90003333333333,
+          "std": 5.7389261970687775,
+          "median": 27.7145,
+          "min": 21.365,
+          "max": 43.625
+        },
+        "scaled_dot_product": {
+          "mean": 25.695200000000003,
+          "std": 5.146174752115432,
+          "median": 24.482999999999997,
+          "min": 20.617,
+          "max": 38.766
+        },
+        "difference": {
+          "mean": 3.2048333333333336,
+          "std": 7.404990628801881,
+          "median": 1.7829999999999977,
+          "min": -9.852999999999998,
+          "max": 21.082
+        }
+      },
+      "normality": {
+        "test": "Shapiro-Wilk",
+        "statistic": 0.9719250698926307,
+        "p_value": 0.5930846615861007,
+        "normal_at_alpha": true
+      },
+      "paired_t_test": {
+        "test": "paired t-test",
+        "statistic": 2.37050875241304,
+        "p_value": 0.024627597313048945,
+        "df": 29,
+        "ci_lower": 0.43976438990248967,
+        "ci_upper": 5.969902276764177,
+        "ci_level": 0.95
+      },
+      "wilcoxon": {
+        "test": "Wilcoxon signed-rank",
+        "statistic": 128.0,
+        "p_value": 0.03098480962216854,
+        "n_nonzero": 30,
+        "n_zero_discarded": 0
+      },
+      "permutation_test": {
+        "test": "paired sign-flip permutation test",
+        "observed_mean_difference": 3.2048333333333336,
+        "p_value": 0.023,
+        "n_permutations": 10000
+      },
+      "bootstrap_ci": {
+        "lower": 0.6154575000000014,
+        "upper": 5.837775833333334,
+        "ci_level": 0.95
+      },
+      "effect_size": {
+        "cohens_dz": 0.4327937054866836,
+        "cohens_dz_label": "small",
+        "rank_biserial": 0.44946236559139785
+      },
+      "decision": {
+        "alpha": 0.05,
+        "selected_test": "paired t-test",
+        "selection_rule": "Shapiro-Wilk p >= alpha -> paired t-test; otherwise Wilcoxon",
+        "p_value": 0.024627597313048945,
+        "reject_h0": true,
+        "conclusion": "Reject H0 (accept H1)",
+        "better_scenario": "scaled_dot_product",
+        "permutation_agrees": true
+      }
+    }
+  },
+  "limitations": [
+    "The 30 pairs share a single train/val/test split; this measures variability of training, not independent population samples.",
+    "Failing to reject H0 does not prove the approaches are equivalent.",
+    "A statistically significant result must be evaluated alongside the magnitude of the difference."
+  ]
+}

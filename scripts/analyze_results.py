@@ -2,20 +2,21 @@
 Statistical analysis of experiment results.
 
 Reads results/metrics.csv and produces results/statistical_analysis.json
-and summary plots in results/figures/.
+and summary plots in results/figures/<run_id>/.
 
-Analysis
---------
-1. Descriptive statistics per scenario (mean, std, min, max of F1).
-2. Paired permutation test (bilateral) on F1 scores:
-     H0: E[F1_additive - F1_scaled_dot_product] = 0
-     H1: E[F1_additive - F1_scaled_dot_product] ≠ 0
-   Method: for each permutation, randomly swap the scenario labels within
-   each pair (equivalent to flipping the sign of each difference with
-   probability 0.5), then compute the mean difference.  The p-value is the
-   proportion of permutations where |mean| >= |observed mean|.
-3. 95 % bootstrap confidence interval on the mean paired difference.
-4. Interpretation of effect magnitude.
+Analysis (see src/stat_tests.py for the pre-specified decision rule)
+--------------------------------------------------------------------
+Primary metric: F1-score of the spam class.
+    H0: E[F1_additive - F1_scaled_dot_product] = 0
+    H1: E[F1_additive - F1_scaled_dot_product] != 0
+
+    1. Shapiro-Wilk on the paired differences.
+    2. Paired t-test (if normal) or Wilcoxon signed-rank (otherwise).
+    3. Permutation test + bootstrap CI as robustness checks.
+    4. Effect sizes (Cohen's d_z, rank-biserial).
+
+Secondary metrics (exploratory, same procedure, no multiplicity correction):
+    precision, recall, accuracy, average precision, training time.
 
 Limitations (documented)
 ------------------------
@@ -28,8 +29,8 @@ Limitations (documented)
 
 Usage
 -----
-    python scripts/analyze_results.py --run-id campaign_20241115_143022
-    python scripts/analyze_results.py --run-id campaign_20241115_143022 --no-plots
+    python scripts/analyze_results.py --run-id campaign_full_30
+    python scripts/analyze_results.py --run-id campaign_full_30 --no-plots
 """
 
 import argparse
@@ -45,95 +46,36 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
+from src.stat_tests import compare_paired  # noqa: E402
+
 logging.basicConfig(level=logging.INFO, format="%(levelname)s  %(message)s")
 logger = logging.getLogger("analyze_results")
 
+SCENARIO_A = "additive"
+SCENARIO_B = "scaled_dot_product"
+LABELS = {SCENARIO_A: "Additive", SCENARIO_B: "Scaled Dot-Product"}
 
-# ──────────────────────────────────────────────────────────────────────
-# Statistical procedures
-# ──────────────────────────────────────────────────────────────────────
-
-def paired_permutation_test(
-    differences: np.ndarray,
-    n_permutations: int = 10_000,
-    seed: int = 42,
-) -> dict:
-    """Bilateral paired permutation test by sign flipping.
-
-    For each permutation, each difference d_i is multiplied by a random sign
-    (+1 or -1), equivalent to swapping scenario labels within pair i.
-
-    Args:
-        differences   : array of shape (n_pairs,), d_i = F1_add_i - F1_sdp_i.
-        n_permutations: number of permutations.
-        seed          : RNG seed for reproducibility.
-
-    Returns:
-        dict with 'observed_mean', 'p_value', and 'n_permutations'.
-    """
-    rng = np.random.default_rng(seed)
-    observed = float(np.mean(differences))
-    n = len(differences)
-
-    count_extreme = 0
-    for _ in range(n_permutations):
-        signs = rng.choice([-1.0, 1.0], size=n)
-        perm_mean = float(np.mean(differences * signs))
-        if abs(perm_mean) >= abs(observed):
-            count_extreme += 1
-
-    p_value = count_extreme / n_permutations
-    return {
-        "observed_mean_difference": observed,
-        "p_value": p_value,
-        "n_permutations": n_permutations,
-    }
+PRIMARY_METRIC = "f1_spam"
+# metric -> higher_is_better
+SECONDARY_METRICS = {
+    "precision_spam":    True,
+    "recall_spam":       True,
+    "accuracy":          True,
+    "average_precision": True,
+    "train_time_s":      False,
+}
 
 
-def bootstrap_ci(
-    differences: np.ndarray,
-    n_bootstrap: int = 10_000,
-    ci: float = 0.95,
-    seed: int = 42,
-) -> dict:
-    """Bootstrap confidence interval for the mean paired difference.
-
-    Args:
-        differences: array of shape (n_pairs,).
-        n_bootstrap: number of bootstrap resamples.
-        ci         : confidence level (e.g. 0.95 for 95 %).
-        seed       : RNG seed.
-
-    Returns:
-        dict with 'lower', 'upper', 'ci_level'.
-    """
-    rng = np.random.default_rng(seed)
-    n = len(differences)
-    boot_means = np.array([
-        np.mean(rng.choice(differences, size=n, replace=True))
-        for _ in range(n_bootstrap)
-    ])
-    alpha = 1.0 - ci
-    lower = float(np.percentile(boot_means, 100 * alpha / 2))
-    upper = float(np.percentile(boot_means, 100 * (1 - alpha / 2)))
-    return {"lower": lower, "upper": upper, "ci_level": ci}
-
-
-def interpret_effect(mean_diff: float, std_diff: float) -> str:
-    """Rough textual description of the effect magnitude.
-
-    Based on the absolute mean difference in F1 score.  These thresholds are
-    heuristic and should not substitute for domain-specific judgment.
-    """
-    abs_diff = abs(mean_diff)
-    if abs_diff < 0.005:
+def interpret_f1_magnitude(mean_diff: float) -> str:
+    """Practical magnitude of the mean F1 difference (heuristic thresholds)."""
+    a = abs(mean_diff)
+    if a < 0.005:
         return "negligible (< 0.005 F1)"
-    elif abs_diff < 0.02:
-        return "small (0.005 – 0.02 F1)"
-    elif abs_diff < 0.05:
-        return "moderate (0.02 – 0.05 F1)"
-    else:
-        return f"large (>= 0.05 F1, |Δ| = {abs_diff:.4f})"
+    if a < 0.02:
+        return "small (0.005 - 0.02 F1)"
+    if a < 0.05:
+        return "moderate (0.02 - 0.05 F1)"
+    return f"large (>= 0.05 F1, |delta| = {a:.4f})"
 
 
 # ──────────────────────────────────────────────────────────────────────
@@ -145,13 +87,11 @@ def plot_f1_distributions(df_add, df_sdp, fig_dir: Path, run_id: str):
     import seaborn as sns
 
     fig_dir.mkdir(parents=True, exist_ok=True)
-
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
-    # Box + strip plot
     df_plot = pd.concat([
-        df_add.assign(scenario="Additive"),
-        df_sdp.assign(scenario="Scaled Dot-Product"),
+        df_add.assign(scenario=LABELS[SCENARIO_A]),
+        df_sdp.assign(scenario=LABELS[SCENARIO_B]),
     ])
     sns.boxplot(data=df_plot, x="scenario", y="f1_spam", ax=axes[0], width=0.4)
     sns.stripplot(data=df_plot, x="scenario", y="f1_spam", ax=axes[0],
@@ -160,7 +100,6 @@ def plot_f1_distributions(df_add, df_sdp, fig_dir: Path, run_id: str):
     axes[0].set_xlabel("Attention mechanism")
     axes[0].set_ylabel("F1-score")
 
-    # Paired difference histogram
     diffs = df_add["f1_spam"].values - df_sdp["f1_spam"].values
     axes[1].hist(diffs, bins=15, edgecolor="white", color="steelblue", alpha=0.8)
     axes[1].axvline(x=0, color="red", linestyle="--", label="Zero")
@@ -173,7 +112,6 @@ def plot_f1_distributions(df_add, df_sdp, fig_dir: Path, run_id: str):
 
     fig.suptitle(f"Run: {run_id}", fontsize=11)
     fig.tight_layout()
-
     out_path = fig_dir / "f1_comparison.png"
     fig.savefig(out_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
@@ -184,31 +122,47 @@ def plot_metrics_summary(df_add, df_sdp, fig_dir: Path, run_id: str):
     import matplotlib.pyplot as plt
 
     fig_dir.mkdir(parents=True, exist_ok=True)
-
     metrics_cols = ["f1_spam", "precision_spam", "recall_spam", "accuracy"]
     add_means = [df_add[m].mean() for m in metrics_cols]
     sdp_means = [df_sdp[m].mean() for m in metrics_cols]
-    add_stds  = [df_add[m].std() for m in metrics_cols]
-    sdp_stds  = [df_sdp[m].std() for m in metrics_cols]
+    add_stds = [df_add[m].std() for m in metrics_cols]
+    sdp_stds = [df_sdp[m].std() for m in metrics_cols]
 
     x = np.arange(len(metrics_cols))
     width = 0.35
-
     fig, ax = plt.subplots(figsize=(10, 5))
-    bars1 = ax.bar(x - width/2, add_means, width, yerr=add_stds,
-                   label="Additive", capsize=4, alpha=0.8)
-    bars2 = ax.bar(x + width/2, sdp_means, width, yerr=sdp_stds,
-                   label="Scaled Dot-Product", capsize=4, alpha=0.8)
-
+    ax.bar(x - width / 2, add_means, width, yerr=add_stds,
+           label=LABELS[SCENARIO_A], capsize=4, alpha=0.8)
+    ax.bar(x + width / 2, sdp_means, width, yerr=sdp_stds,
+           label=LABELS[SCENARIO_B], capsize=4, alpha=0.8)
     ax.set_xticks(x)
     ax.set_xticklabels(["F1 (spam)", "Precision (spam)", "Recall (spam)", "Accuracy"])
     ax.set_ylim(0, 1.1)
-    ax.set_ylabel("Score (mean ± std over 30 seeds)")
+    ax.set_ylabel(f"Score (mean ± std over {len(df_add)} seeds)")
     ax.set_title(f"Metrics comparison — Run: {run_id}")
     ax.legend()
     fig.tight_layout()
-
     out_path = fig_dir / "metrics_summary.png"
+    fig.savefig(out_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    logger.info("Saved figure: %s", out_path)
+
+
+def plot_qq_differences(df_add, df_sdp, fig_dir: Path, shapiro_p):
+    """Normal Q-Q plot of the paired F1 differences (supports Shapiro-Wilk)."""
+    import matplotlib.pyplot as plt
+    from scipy import stats
+
+    fig_dir.mkdir(parents=True, exist_ok=True)
+    diffs = df_add["f1_spam"].values - df_sdp["f1_spam"].values
+    fig, ax = plt.subplots(figsize=(5, 5))
+    stats.probplot(diffs, dist="norm", plot=ax)
+    p_txt = "n/a" if shapiro_p is None else f"{shapiro_p:.4f}"
+    ax.set_title(f"Normal Q-Q plot of ΔF1 (Shapiro-Wilk p = {p_txt})")
+    ax.set_xlabel("Theoretical quantiles")
+    ax.set_ylabel("Observed ΔF1")
+    fig.tight_layout()
+    out_path = fig_dir / "qq_f1_differences.png"
     fig.savefig(out_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
     logger.info("Saved figure: %s", out_path)
@@ -218,46 +172,21 @@ def plot_metrics_summary(df_add, df_sdp, fig_dir: Path, run_id: str):
 # Main
 # ──────────────────────────────────────────────────────────────────────
 
-def main():
-    parser = argparse.ArgumentParser(description="Analyse experiment results.")
-    parser.add_argument(
-        "--run-id",
-        required=True,
-        help="Run ID to analyse (must exist in results/metrics.csv).",
-    )
-    parser.add_argument(
-        "--no-plots",
-        action="store_true",
-        help="Skip generating figures.",
-    )
-    parser.add_argument(
-        "--config",
-        default=str(REPO_ROOT / "configs" / "experiment.yaml"),
-    )
-    args = parser.parse_args()
-
-    with open(args.config) as fh:
-        config = yaml.safe_load(fh)
-
-    sta_cfg = config["statistical_analysis"]
-    alpha   = sta_cfg["significance_level"]
-
-    # Load metrics
+def load_paired_runs(run_id: str):
     metrics_path = REPO_ROOT / "results" / "metrics.csv"
     if not metrics_path.exists() or metrics_path.stat().st_size == 0:
         logger.error("No metrics found at %s.  Run experiments first.", metrics_path)
         sys.exit(1)
 
     df = pd.read_csv(metrics_path)
-    df_run = df[df["run_id"] == args.run_id]
-
+    df_run = df[df["run_id"] == run_id]
     if df_run.empty:
-        logger.error("Run ID '%s' not found in metrics CSV.", args.run_id)
+        logger.error("Run ID '%s' not found in metrics CSV.", run_id)
         logger.info("Available run IDs: %s", df["run_id"].unique().tolist())
         sys.exit(1)
 
-    df_add = df_run[df_run["scenario"] == "additive"].sort_values("seed").reset_index(drop=True)
-    df_sdp = df_run[df_run["scenario"] == "scaled_dot_product"].sort_values("seed").reset_index(drop=True)
+    df_add = df_run[df_run["scenario"] == SCENARIO_A].sort_values("seed").reset_index(drop=True)
+    df_sdp = df_run[df_run["scenario"] == SCENARIO_B].sort_values("seed").reset_index(drop=True)
 
     if len(df_add) != len(df_sdp):
         logger.error(
@@ -266,85 +195,70 @@ def main():
             len(df_add), len(df_sdp),
         )
         sys.exit(1)
-
-    logger.info("Analysing %d pairs for run '%s'.", len(df_add), args.run_id)
-
-    # Verify seeds match pair-wise
     if not (df_add["seed"].values == df_sdp["seed"].values).all():
         logger.error("Seed mismatch between scenarios — results may not be paired correctly.")
         sys.exit(1)
+    if len(df_add) < 3:
+        logger.error("At least 3 complete pairs are required (found %d).", len(df_add))
+        sys.exit(1)
+    return df_add, df_sdp
 
-    # ── Descriptive statistics ────────────────────────────────────────
-    def describe(series: pd.Series) -> dict:
-        return {
-            "mean": float(series.mean()),
-            "std":  float(series.std(ddof=1)),
-            "min":  float(series.min()),
-            "max":  float(series.max()),
-        }
 
-    stats_add = describe(df_add["f1_spam"])
-    stats_sdp = describe(df_sdp["f1_spam"])
+def main():
+    # Windows consoles may default to a legacy code page (Δ, α, ± would fail)
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError):
+        pass
 
-    # ── Paired differences ────────────────────────────────────────────
-    differences = df_add["f1_spam"].values - df_sdp["f1_spam"].values
+    parser = argparse.ArgumentParser(description="Analyse experiment results.")
+    parser.add_argument("--run-id", required=True,
+                        help="Run ID to analyse (must exist in results/metrics.csv).")
+    parser.add_argument("--no-plots", action="store_true", help="Skip generating figures.")
+    parser.add_argument("--config", default=str(REPO_ROOT / "configs" / "experiment.yaml"))
+    args = parser.parse_args()
 
-    # ── Permutation test ──────────────────────────────────────────────
-    perm_result = paired_permutation_test(
-        differences,
-        n_permutations=sta_cfg["n_permutations"],
-        seed=sta_cfg["seed"],
+    with open(args.config) as fh:
+        config = yaml.safe_load(fh)
+    sta_cfg = config["statistical_analysis"]
+    alpha = sta_cfg["significance_level"]
+
+    df_add, df_sdp = load_paired_runs(args.run_id)
+    logger.info("Analysing %d pairs for run '%s'.", len(df_add), args.run_id)
+
+    def run(metric: str, higher_is_better: bool) -> dict:
+        return compare_paired(
+            df_add[metric].values, df_sdp[metric].values,
+            name_a=SCENARIO_A, name_b=SCENARIO_B,
+            alpha=alpha,
+            higher_is_better=higher_is_better,
+            n_permutations=sta_cfg["n_permutations"],
+            n_bootstrap=sta_cfg["bootstrap_n_samples"],
+            ci=sta_cfg["bootstrap_ci"],
+            seed=sta_cfg["seed"],
+        )
+
+    primary = run(PRIMARY_METRIC, True)
+    primary["practical_magnitude"] = interpret_f1_magnitude(
+        primary["descriptive"]["difference"]["mean"]
     )
+    primary["differences"] = (df_add[PRIMARY_METRIC].values - df_sdp[PRIMARY_METRIC].values).tolist()
+    secondary = {m: run(m, hib) for m, hib in SECONDARY_METRICS.items()}
 
-    # ── Bootstrap CI ─────────────────────────────────────────────────
-    ci_result = bootstrap_ci(
-        differences,
-        n_bootstrap=sta_cfg["bootstrap_n_samples"],
-        ci=sta_cfg["bootstrap_ci"],
-        seed=sta_cfg["seed"],
-    )
-
-    # ── Decision ─────────────────────────────────────────────────────
-    p_value   = perm_result["p_value"]
-    reject_h0 = p_value < alpha
-    decision  = "Reject H0" if reject_h0 else "Fail to reject H0"
-    effect    = interpret_effect(perm_result["observed_mean_difference"], float(np.std(differences, ddof=1)))
-
-    # ── Assemble output ───────────────────────────────────────────────
     analysis = {
-        "run_id":      args.run_id,
-        "n_pairs":     int(len(df_add)),
-        "scenarios": {
-            "additive": {
-                "n": len(df_add),
-                "f1_spam": stats_add,
-                "train_time_s": describe(df_add["train_time_s"]),
-            },
-            "scaled_dot_product": {
-                "n": len(df_sdp),
-                "f1_spam": stats_sdp,
-                "train_time_s": describe(df_sdp["train_time_s"]),
-            },
+        "run_id": args.run_id,
+        "n_pairs": int(len(df_add)),
+        "seeds": df_add["seed"].astype(int).tolist(),
+        "hypotheses": {
+            "H0": "E[F1_additive - F1_scaled_dot_product] = 0",
+            "H1": "E[F1_additive - F1_scaled_dot_product] != 0",
         },
-        "paired_difference": {
-            "definition": "F1_additive - F1_scaled_dot_product, per pair",
-            "differences": differences.tolist(),
-            "mean_diff": perm_result["observed_mean_difference"],
-            "std_diff": float(np.std(differences, ddof=1)),
-        },
-        "permutation_test": {
-            **perm_result,
-            "alternative": "two-sided",
-            "method": "paired sign-swap permutation test",
-        },
-        "bootstrap_ci_95": ci_result,
-        "statistical_decision": {
-            "alpha":     alpha,
-            "p_value":   p_value,
-            "reject_h0": reject_h0,
-            "decision":  decision,
-            "effect_magnitude": effect,
-        },
+        "primary_metric": PRIMARY_METRIC,
+        "primary": primary,
+        "secondary_metrics_note": (
+            "Exploratory; same procedure; no correction for multiple comparisons."
+        ),
+        "secondary": secondary,
         "limitations": [
             "The 30 pairs share a single train/val/test split; this measures "
             "variability of training, not independent population samples.",
@@ -354,34 +268,68 @@ def main():
         ],
     }
 
-    # Save JSON
     out_path = REPO_ROOT / "results" / "statistical_analysis.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(out_path, "w") as fh:
-        json.dump(analysis, fh, indent=2)
+    with open(out_path, "w", encoding="utf-8") as fh:
+        json.dump(analysis, fh, indent=2, ensure_ascii=False)
     logger.info("Statistical analysis saved to %s", out_path)
 
-    # Print summary
-    print("\n" + "=" * 60)
-    print(f"Statistical Analysis — Run: {args.run_id}")
-    print("=" * 60)
-    print(f"  Additive     F1: {stats_add['mean']:.4f} ± {stats_add['std']:.4f}")
-    print(f"  Scaled DP    F1: {stats_sdp['mean']:.4f} ± {stats_sdp['std']:.4f}")
-    print(f"  Mean Δ F1   : {perm_result['observed_mean_difference']:+.4f}")
-    print(f"  95% CI      : [{ci_result['lower']:+.4f}, {ci_result['upper']:+.4f}]")
-    print(f"  p-value     : {p_value:.4f}")
-    print(f"  Decision    : {decision}  (α = {alpha})")
-    print(f"  Effect      : {effect}")
-    print("=" * 60)
+    print_summary(analysis)
 
-    # Plots
     if not args.no_plots:
         fig_dir = REPO_ROOT / "results" / "figures" / args.run_id
         try:
             plot_f1_distributions(df_add, df_sdp, fig_dir, args.run_id)
             plot_metrics_summary(df_add, df_sdp, fig_dir, args.run_id)
+            plot_qq_differences(df_add, df_sdp, fig_dir, primary["normality"]["p_value"])
         except ImportError as e:
             logger.warning("Plotting skipped (%s). Install matplotlib and seaborn.", e)
+
+
+def _fmt_p(p):
+    return "n/a" if p is None else f"{p:.4f}"
+
+
+def print_summary(analysis: dict):
+    p = analysis["primary"]
+    desc = p["descriptive"]
+    dec = p["decision"]
+    print("\n" + "=" * 68)
+    print(f"Statistical Analysis — Run: {analysis['run_id']}  ({analysis['n_pairs']} pairs)")
+    print("=" * 68)
+    print("Primary metric: F1 (spam)")
+    print(f"  Additive        : {desc[SCENARIO_A]['mean']:.4f} ± {desc[SCENARIO_A]['std']:.4f}")
+    print(f"  Scaled DP       : {desc[SCENARIO_B]['mean']:.4f} ± {desc[SCENARIO_B]['std']:.4f}")
+    print(f"  Mean ΔF1        : {desc['difference']['mean']:+.4f}")
+    print(f"  Shapiro-Wilk    : p = {_fmt_p(p['normality']['p_value'])} "
+          f"({'normal' if p['normality']['normal_at_alpha'] else 'not normal'})")
+    t = p["paired_t_test"]
+    print(f"  Paired t-test   : p = {_fmt_p(t['p_value'])}  "
+          f"95% CI [{t['ci_lower']:+.4f}, {t['ci_upper']:+.4f}]")
+    print(f"  Wilcoxon        : p = {_fmt_p(p['wilcoxon']['p_value'])}")
+    print(f"  Permutation     : p = {_fmt_p(p['permutation_test']['p_value'])}")
+    b = p["bootstrap_ci"]
+    print(f"  Bootstrap 95% CI: [{b['lower']:+.4f}, {b['upper']:+.4f}]")
+    e = p["effect_size"]
+    print(f"  Cohen's d_z     : {e['cohens_dz']:+.3f} ({e['cohens_dz_label']})   "
+          f"rank-biserial: {e['rank_biserial']:+.3f}")
+    print(f"  Practical size  : {p['practical_magnitude']}")
+    print(f"  Selected test   : {dec['selected_test']}  (α = {dec['alpha']})")
+    print(f"  DECISION        : {dec['conclusion']}"
+          + (f" — better: {dec['better_scenario']}" if dec["better_scenario"] else ""))
+    print(f"  Permutation test agrees: {dec['permutation_agrees']}")
+
+    print("\nSecondary metrics (exploratory):")
+    print(f"  {'metric':<18}{'additive':>10}{'scaled_dp':>11}{'Δ mean':>10}"
+          f"{'test':>10}{'p':>9}  result")
+    for m, r in analysis["secondary"].items():
+        d = r["descriptive"]
+        dd = r["decision"]
+        short = "t" if dd["selected_test"] == "paired t-test" else "Wilcoxon"
+        res = dd["better_scenario"] + " better" if dd["better_scenario"] else "n.s."
+        print(f"  {m:<18}{d[SCENARIO_A]['mean']:>10.4f}{d[SCENARIO_B]['mean']:>11.4f}"
+              f"{d['difference']['mean']:>+10.4f}{short:>10}{dd['p_value']:>9.4f}  {res}")
+    print("=" * 68)
 
 
 if __name__ == "__main__":

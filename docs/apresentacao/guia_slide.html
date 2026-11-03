@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guia dos Slides</title>
+<style>
+  :root {
+    --bg: #f6f5f1;
+    --surface: #ffffff;
+    --surface-2: #efede7;
+    --text: #1d1d1b;
+    --muted: #5f5e58;
+    --border: #dcd9d0;
+    --accent: #2b4c7e;
+    --accent-soft: #e3e9f3;
+    --add: #1f77b4;      /* Atenção aditiva  = mesma cor dos gráficos (matplotlib C0) */
+    --sdp: #ff7f0e;      /* Produto escalar  = mesma cor dos gráficos (matplotlib C1) */
+    --ok: #2e7d4f;
+    --warn: #a35c00;
+    --slide-bg: #ffffff;
+    --slide-text: #1d1d1b;
+    --slide-title: #2b4c7e;
+    --slide-muted: #6b6a64;
+    --slide-box: #f1f3f7;
+    --code-bg: #f0eee8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161614;
+      --surface: #1f1f1c;
+      --surface-2: #292925;
+      --text: #ecebe6;
+      --muted: #a6a59e;
+      --border: #3a3a35;
+      --accent: #8fb0e3;
+      --accent-soft: #263247;
+      --ok: #6cc08f;
+      --warn: #e2a14a;
+      --code-bg: #2a2a26;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #161614;
+    --surface: #1f1f1c;
+    --surface-2: #292925;
+    --text: #ecebe6;
+    --muted: #a6a59e;
+    --border: #3a3a35;
+    --accent: #8fb0e3;
+    --accent-soft: #263247;
+    --ok: #6cc08f;
+    --warn: #e2a14a;
+    --code-bg: #2a2a26;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.55 "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  code, pre, .mono { font-family: "Cascadia Code", Consolas, "SFMono-Regular", Menlo, monospace; font-size: .88em; }
+  code { background: var(--code-bg); padding: .1em .35em; border-radius: 4px; }
+  pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
+  a { color: var(--accent); }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 16px 80px; }
+  header.top { margin-bottom: 28px; }
+  header.top h1 { font-size: 2rem; margin: 0 0 6px; letter-spacing: -.01em; }
+  header.top p { margin: 0; color: var(--muted); max-width: 760px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .pill { font-size: .8rem; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+
+  nav.toc {
+    position: sticky; top: 0; z-index: 5;
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border);
+    margin: 0 -16px 24px; padding: 10px 16px;
+    display: flex; gap: 6px; overflow-x: auto; white-space: nowrap;
+  }
+  nav.toc a {
+    text-decoration: none; color: var(--muted); font-size: .85rem;
+    padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface);
+  }
+  nav.toc a:hover { color: var(--accent); border-color: var(--accent); }
+
+  section.block { margin: 40px 0; }
+  section.block > h2 { font-size: 1.35rem; margin: 0 0 12px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 820px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .swatches { display: flex; flex-wrap: wrap; gap: 12px; }
+  .sw { display: flex; align-items: center; gap: 10px; min-width: 210px; }
+  .sw i { width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border); flex: none; }
+  .sw small { display: block; color: var(--muted); }
+
+  ul.tight { margin: 6px 0; padding-left: 20px; }
+  ul.tight li { margin: 3px 0; }
+  .note { border-left: 4px solid var(--warn); background: var(--surface-2); padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 12px 0; }
+  .note.ok { border-color: var(--ok); }
+
+  /* ── Slide entries ─────────────────────────────── */
+  .slide-entry {
+    display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 18px; margin: 18px 0; scroll-margin-top: 64px;
+  }
+  @media (max-width: 900px) { .slide-entry { grid-template-columns: 1fr; } }
+  .entry-head { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .entry-head .num { font-weight: 700; color: var(--accent); font-size: 1.1rem; }
+  .entry-head h3 { margin: 0; font-size: 1.15rem; }
+  .entry-head .time { margin-left: auto; font-size: .8rem; color: var(--muted); }
+
+  /* 16:9 slide mockup (always light, like the projected slide) */
+  .slide {
+    aspect-ratio: 16 / 9; width: 100%;
+    background: var(--slide-bg); color: var(--slide-text);
+    border-radius: 8px; border: 1px solid #cfccc3;
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    padding: 4.2% 5%; display: flex; flex-direction: column;
+    font-size: clamp(8px, 1.15vw, 13px); line-height: 1.35; overflow: hidden; position: relative;
+  }
+  @media (max-width: 900px) { .slide { font-size: clamp(7px, 2.1vw, 13px); } }
+  .slide .s-title { color: var(--slide-title); font-weight: 700; font-size: 1.75em; margin: 0 0 .5em; }
+  .slide .s-sub { color: var(--slide-muted); font-size: 1em; margin-top: -.3em; margin-bottom: .6em; }
+  .slide .s-body { flex: 1; display: flex; gap: 4%; min-height: 0; }
+  .slide .col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .5em; }
+  .slide ul { margin: 0; padding-left: 1.2em; }
+  .slide li { margin: .2em 0; }
+  .slide .fig {
+    flex: 1; border: 1.5px dashed #9aa6b8; border-radius: 6px; background: var(--slide-box);
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    color: #4d5a6e; padding: .5em; font-size: .85em; min-height: 0;
+  }
+  .slide .fig b { display: block; font-size: 1.05em; margin-bottom: .2em; }
+  .slide .box { background: var(--slide-box); border-radius: 6px; padding: .5em .7em; }
+  .slide .big { font-size: 2.1em; font-weight: 700; color: var(--slide-title); line-height: 1.1; }
+  .slide .ph { background: #fff4d6; color: #7a5300; border-radius: 3px; padding: 0 .25em; font-family: Consolas, monospace; font-size: .9em; }
+  .slide .footer { position: absolute; left: 5%; right: 5%; bottom: 3%; display: flex; justify-content: space-between; color: var(--slide-muted); font-size: .7em; border-top: 1px solid #e3e1da; padding-top: .3em; }
+  .slide .tag-add { color: var(--add); font-weight: 700; }
+  .slide .tag-sdp { color: var(--sdp); font-weight: 700; }
+  .slide table { border-collapse: collapse; width: 100%; font-size: .9em; }
+  .slide th, .slide td { border-bottom: 1px solid #e0ddd5; padding: .25em .4em; text-align: left; }
+  .slide th { color: var(--slide-muted); font-weight: 600; }
+  .slide .eq { font-family: "Cambria Math", "Times New Roman", serif; font-size: 1.05em; background: var(--slide-box); padding: .35em .6em; border-radius: 5px; }
+  .slide .flow { display: flex; align-items: center; gap: .4em; flex-wrap: wrap; }
+  .slide .flow span { background: var(--slide-box); border: 1px solid #c9d2df; border-radius: 5px; padding: .3em .55em; }
+  .slide .flow em { color: var(--slide-muted); font-style: normal; }
+
+  .slide.cover { justify-content: center; background: linear-gradient(135deg, #2b4c7e 0%, #1c3358 100%); color: #fff; border: none; }
+  .slide.cover .s-title { color: #fff; font-size: 2.4em; }
+  .slide.cover .s-sub { color: #d6e0f0; font-size: 1.2em; }
+  .slide.cover .footer { color: #c4d1e6; border-color: rgba(255,255,255,.25); }
+
+  .details h4 { margin: 0 0 4px; font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .details > div { margin-bottom: 14px; }
+  .details .say { font-style: italic; color: var(--text); background: var(--surface-2); border-radius: 8px; padding: 8px 12px; }
+  .src { display: flex; flex-wrap: wrap; gap: 6px; }
+  .src code { font-size: .8rem; }
+
+  table.plain { border-collapse: collapse; width: 100%; font-size: .92rem; }
+  table.plain th, table.plain td { border-bottom: 1px solid var(--border); padding: 7px 8px; text-align: left; vertical-align: top; }
+  table.plain th { color: var(--muted); font-weight: 600; }
+  .table-scroll { overflow-x: auto; }
+
+  .checklist label { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-bottom: 1px dashed var(--border); cursor: pointer; }
+  .checklist input { margin-top: 4px; }
+
+  .theme-btn { position: fixed; right: 16px; bottom: 16px; z-index: 10; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 999px; padding: 8px 14px; cursor: pointer; font: inherit; font-size: .85rem; }
+  @media print {
+    nav.toc, .theme-btn { display: none; }
+    .slide-entry { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>Guia dos Slides — Detecção de Spam com LSTM + Atenção</h1>
+  <p>Modelo slide a slide para a apresentação do estudo comparativo (2ª avaliação). Cada slide traz um <b>esboço 16:9</b> para reproduzir no PowerPoint ou Google Slides, o <b>conteúdo</b>, <b>de onde tirar os números/figuras</b> no repositório e uma <b>fala sugerida</b>.</p>
+  <div class="meta">
+    <span class="pill">15 slides</span>
+    <span class="pill">≈ 12–15 min</span>
+    <span class="pill">16:9</span>
+    <span class="pill">run_id: campaign_full_30</span>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Sumário">
+  <a href="#padrao">Padrão visual</a>
+  <a href="#fontes">Fontes dos dados</a>
+  <a href="#s1">1 Capa</a>
+  <a href="#s2">2 Problema</a>
+  <a href="#s3">3 Objetivo</a>
+  <a href="#s4">4 Base</a>
+  <a href="#s5">5 Técnicas</a>
+  <a href="#s6">6 Cenários</a>
+  <a href="#s7">7 Arquitetura</a>
+  <a href="#s8">8 Protocolo</a>
+  <a href="#s9">9 Estatística</a>
+  <a href="#s10">10 Métricas</a>
+  <a href="#s11">11 Distribuição</a>
+  <a href="#s12">12 Hipótese</a>
+  <a href="#s13">13 Custo</a>
+  <a href="#s14">14 Limitações</a>
+  <a href="#s15">15 Conclusão</a>
+  <a href="#checklist">Checklist</a>
+</nav>
+
+<!-- ═════════════════════════ PADRÃO VISUAL ═════════════════════════ -->
+<section class="block" id="padrao">
+  <h2>1. Padrão visual</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3 style="margin-top:0">Cores</h3>
+      <div class="swatches">
+        <div class="sw"><i style="background:#2b4c7e"></i><div><b>#2B4C7E</b><small>Títulos, capa, destaques</small></div></div>
+        <div class="sw"><i style="background:#1f77b4"></i><div><b>#1F77B4</b><small>Cenário 1 — Atenção aditiva</small></div></div>
+        <div class="sw"><i style="background:#ff7f0e"></i><div><b>#FF7F0E</b><small>Cenário 2 — Produto escalar</small></div></div>
+        <div class="sw"><i style="background:#1d1d1b"></i><div><b>#1D1D1B</b><small>Texto</small></div></div>
+        <div class="sw"><i style="background:#6b6a64"></i><div><b>#6B6A64</b><small>Texto secundário, rodapé</small></div></div>
+        <div class="sw"><i style="background:#f1f3f7"></i><div><b>#F1F3F7</b><small>Caixas e fundos de figura</small></div></div>
+      </div>
+      <div class="note ok">Azul = aditiva e laranja = produto escalar <b>em todos os slides</b>. São as cores padrão que o matplotlib/seaborn usa nos gráficos de <code>results/figures/</code>, então texto e figuras ficam consistentes.</div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Tipografia e layout</h3>
+      <table class="plain">
+        <tr><th>Elemento</th><th>Fonte</th><th>Tamanho</th></tr>
+        <tr><td>Título do slide</td><td>Segoe UI / Calibri, negrito</td><td>32–36 pt</td></tr>
+        <tr><td>Texto / bullets</td><td>Segoe UI / Calibri</td><td>18–22 pt</td></tr>
+        <tr><td>Número de destaque</td><td>negrito, cor de título</td><td>44–60 pt</td></tr>
+        <tr><td>Equações</td><td>Cambria Math</td><td>20–24 pt</td></tr>
+        <tr><td>Rodapé</td><td>regular, cinza</td><td>10–12 pt</td></tr>
+      </table>
+      <ul class="tight">
+        <li>Uma ideia por slide; no máximo <b>5 bullets</b> com até ~10 palavras cada.</li>
+        <li>Margens de ~5 % e alinhamento à esquerda; título sempre na mesma posição.</li>
+        <li>Figuras exportadas com <code>dpi=150</code> (ou mais); nunca esticar — redimensionar mantendo proporção.</li>
+        <li>Números com 4 casas decimais para F1 e p-valor; ± desvio padrão sempre junto da média.</li>
+        <li>Rodapé: título curto do trabalho à esquerda, número do slide à direita.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════ FONTES ═════════════════════════ -->
+<section class="block" id="fontes">
+  <h2>2. De onde vêm os números e figuras</h2>
+  <div class="card">
+    <p style="margin-top:0">Depois da campanha completa, gere tudo com:</p>
+<pre>.venv\Scripts\activate
+python scripts/analyze_results.py --run-id campaign_full_30</pre>
+    <p>Nos esboços, os trechos em <span class="mono" style="background:#fff4d6;color:#7a5300;padding:0 .3em;border-radius:3px">amarelo</span> são <b>espaços reservados</b>: substitua pelo valor do campo indicado em <code>results/statistical_analysis.json</code> (abreviado como <code>json.</code>).</p>
+    <div class="table-scroll">
+    <table class="plain">
+      <tr><th>Arquivo</th><th>Conteúdo</th><th>Usado nos slides</th></tr>
+      <tr><td><code>results/statistical_analysis.json</code></td><td>Médias, desvios, testes (Shapiro, t, Wilcoxon, permutação), IC, tamanho de efeito, decisão</td><td>10, 12, 13, 15</td></tr>
+      <tr><td><code>results/metrics.csv</code></td><td>Uma linha por (cenário, semente): F1, precisão, recall, acurácia, tempo, épocas</td><td>10, 13</td></tr>
+      <tr><td><code>results/figures/campaign_full_30/f1_comparison.png</code></td><td>Boxplot do F1 + histograma das diferenças pareadas</td><td>11</td></tr>
+      <tr><td><code>results/figures/campaign_full_30/metrics_summary.png</code></td><td>Barras média ± dp de F1, precisão, recall, acurácia</td><td>10</td></tr>
+      <tr><td><code>results/figures/campaign_full_30/qq_f1_differences.png</code></td><td>Gráfico Q-Q das diferenças (justifica t ou Wilcoxon)</td><td>12</td></tr>
+      <tr><td><code>docs/metodologia.md</code></td><td>Decisões metodológicas, hiperparâmetros, referências</td><td>4–9, 14</td></tr>
+      <tr><td><code>configs/experiment.yaml</code></td><td>Hiperparâmetros e sementes</td><td>7, 8</td></tr>
+    </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════ SLIDES ═════════════════════════ -->
+<section class="block">
+  <h2>3. Slide a slide</h2>
+
+  <!-- 1 -->
+  <article class="slide-entry" id="s1">
+    <div class="entry-head"><span class="num">01</span><h3>Capa</h3><span class="time">≈ 20 s</span></div>
+    <div class="slide cover">
+      <div class="s-title">Atenção Aditiva vs. Produto Escalar em LSTM para Detecção de Spam em SMS</div>
+      <div class="s-sub">Estudo comparativo com 30 simulações pareadas</div>
+      <div style="margin-top:1.5em;color:#d6e0f0">Nomes da equipe · Inteligência Artificial · CESAR School · 2026</div>
+      <div class="footer"><span>2ª Avaliação</span><span>1</span></div>
+    </div>
+    <div class="details">
+      <div><h4>Conteúdo</h4>Título, subtítulo, nomes da equipe, disciplina, instituição e data.</div>
+      <div><h4>Fala sugerida</h4><div class="say">“Vamos apresentar um estudo comparando dois mecanismos de atenção em uma rede LSTM para classificar SMS como spam ou legítimos.”</div></div>
+    </div>
+  </article>
+
+  <!-- 2 -->
+  <article class="slide-entry" id="s2">
+    <div class="entry-head"><span class="num">02</span><h3>Problema e motivação</h3><span class="time">≈ 45 s</span></div>
+    <div class="slide">
+      <div class="s-title">Problema</div>
+      <div class="s-body">
+        <div class="col">
+          <ul>
+            <li>SMS indesejados: publicidade, prêmios falsos, links</li>
+            <li>Classificação binária: <b>ham</b> vs. <b>spam</b></li>
+            <li>Classes desbalanceadas (≈ 13 % spam)</li>
+            <li>Atenção: o modelo “olha” para as palavras mais relevantes</li>
+          </ul>
+        </div>
+        <div class="col">
+          <div class="box"><b>spam</b><br>“WINNER!! As a valued network customer you have been selected to receivea £900 prize reward! To claim call 09061701461…”</div>
+          <div class="box"><b>ham</b><br>“Ok lar... Joking wif u oni...”</div>
+        </div>
+      </div>
+      <div class="footer"><span>Detecção de Spam · LSTM + Atenção</span><span>2</span></div>
+    </div>
+    <div class="details">
+      <div><h4>Conteúdo</h4>Contexto do problema e por que atenção é interessante. Dois exemplos reais da base (escolha mensagens curtas em <code>data/raw/SMSSpamCollection</code>).</div>
+      <div><h4>Fonte</h4><div class="src"><code>data/raw/SMSSpamCollection</code><code>notebooks/exploracao.ipynb</code></div></div>
+      <div><h4>Fala sugerida</h4><div class="say">“Spam é desbalanceado e cheio de pistas locais — números, £, ‘FREE’. A atenção permite ao modelo dar mais peso a esses tokens.”</div></div>
+    </div>
+  </article>
+
+  <!-- 3 -->
+  <article class="slide-entry" id="s3">
+    <div class="entry-head"><span class="num">03</span><h3>Objetivo e hipóteses</h3><span class="time">≈ 45 s</span></div>
+    <div class="slide">
+      <div class="s-title">Objetivo e hipóteses</div>
+      <div class="s-body">
+        <div class="col">
+          <p style="margin:0">Comparar <span class="tag-add">atenção aditiva</span> e <span class="tag-sdp">atenção por produto escalar</span> numa mesma rede Embedding + LSTM.</p>
+          <ul>
+            <li>Métrica principal: <b>F1-score da classe spam</b></li>
+            <li>30 simulações pareadas por cenário</li>
+            <li>α = 0,05</li>
+          </ul>
+        </div>
+        <div class="col">
+          <div class="box"><b>H₀</b> — não há diferença no F1 esperado<br><span class="eq">E[F1<sub>adit</sub> − F1<sub>prod</sub>] = 0</span></div>
+          <div class="box"><b>H₁</b> — há diferença no F1 esperado<br><span class="eq">E[F1<sub>adit</sub> − F1<sub>prod</sub>] ≠ 0</span></div>
+        </div>
+      </div>
+      <div class="footer"><span>Detecção de Spam · LSTM + Atenção</span><span>3</span></div>
+    </div>
+    <div class="details">
+      <div><h4>Conteúdo</h4>Objetivo em uma frase, métrica principal e as duas hipóteses escritas formalmente.</div>
+      <div><h4>Fonte</h4><div class="src"><code>README.md</code><code>json.hypotheses</code></div></div>
+      <div><h4>Fala sugerida</h4><div class="say">“A pergunta é: trocar só o mecanismo de atenção muda o desempenho? H₀ diz que não; H₁ diz que sim.”</div></div>
+    </div>
+  </article>
+
+  <!-- 4 -->
+  <article class="slide-entry" id="s4">
+    <div class="entry-head"><span class="num">04</span><h3>Base de dados</h3><span class="time">≈ 50 s</span></div>
+    <div class="slide">
+      <div class="s-title">Base: SMS Spam Collection (UCI)</div>
+      <div class="s-body">
+        <div class="col">
+          <table>
+            <tr><th></th><th>Ham</th><th>Spam</th><th>Total</th></tr>
+            <tr><td>Original</td><td>4.825</td><td>747</td><td>5.572</td></tr>
+            <tr><td>Sem duplicatas</td><td>4.516</td><td>653</td><td><b>5.169</b></td></tr>
+          </table>
+          <ul>
+            <li>403 duplicatas exatas removidas antes da divisão</li>
+            <li>Divisão estratificada 70 / 15 / 15 (semente 42)</li>
+            <li>Tokenizador ajustado <b>só no treino</b></li>
+          </ul>
+        </div>
+        <div class="col">
+          <div class="flow" style="justify-content:center;margin-top:.5em"><span>Treino<br><b>3.618</b></span><span>Validação<br><b>775</b></span><span>Teste<br><b>776</b></span></div>
+          <div class="fig"><div><b>Gráfico opcional</b>distribuição de classes / comprimento das mensagens<br><code>notebooks/exploracao.ipynb</code></div></div>
+        </div>
+      </div>
+      <div class="footer"><span>Detecção de Spam · LSTM + Atenção</span><span>4</span></div>
+    </div>
+    <div class="details">
+      <div><h4>Conteúdo</h4>Tamanho da base, efeito da deduplicação, divisão e cuidados contra vazamento de dados. Os números ao lado já foram conferidos no repositório.</div>
+      <div><h4>Fonte</h4><div class="src"><code>docs/metodologia.md §1–3</code><code>data/processed/split_ids.json</code></div></div>
+      <div><h4>Fala sugerida</h4><div class="say">“Removemos duplicatas antes de dividir, para a mesma mensagem não cair no treino e no teste. Só 12,6 % é spam, por isso usamos F1 e não acurácia.”</div></div>
+    </div>
+  </article>
+
+  <!-- 5 -->
+  <article class="slide-entry" id="s5">
+    <div class="entry-head"><span class="num">05</span><h3>As três técnicas</h3><span class="time">≈ 60 s</span></div>
+    <div class="slide">
+      <div class="s-title">Técnicas A + B + C</div>
+      <div class="s-body">
+        <div class="col"><div class="box" style="flex:1"><b>A · Embeddings</b><br>Cada palavra vira um vetor denso de 64 dimensões, aprendido durante o treino.</div></div>
+        <div class="col"><div class="box" style="flex:1"><b>B · LSTM</b><br>Rede recorrente com 64 unidades; lê a mensagem em ordem e guarda contexto.</div></div>
+        <div class="col"><div class="box" style="flex:1"><b>C · Atenção</b><br>Pondera os estados da LSTM e cria um vetor-resumo focado nas palavras importantes.</div></div>
+      </div>
+      <div class="footer"><span>Detecção de Spam · LSTM + Atenção</span><span>5</span></div>
+    </div>
+    <div class="details">
+      <div><h4>Conteúdo</h4>As três técnicas vistas em aula, uma por coluna, com uma frase cada.</div>
+      <div class="note ok">Confirmado com a professora (03/11/2026): <b>embeddings treináveis</b> contam como técnica separada.</div>
+      <div><h4>Fala sugerida</h4><div class="say">“A e B são fixas nos dois cenários. O que muda é só a técnica C.”</div></div>
+    </div>
+  </article>
+
+  <!-- 6 -->
+  <article class="slide-entry" id="s6">
+    <div class="entry-head"><span class="num">06</span><h3>Os dois cenários</h3><span class="time">≈ 75 s</span></div>
+    <div class="slide">
+      <div class="s-title">Cenário 1 vs. Cenário 2</div>
+      <div class="s-body">
+        <div class="col">
+          <div class="tag-add" style="font-size:1.2em">Cenário 1 · Atenção aditiva</div>
+          <div class="eq">score<sub>i</sub> = vᵀ tanh(W<sub>q</sub> h<sub>T</sub> + W<sub>k</sub> h<sub>i</sub>)</div>
+          <ul><li>Bahdanau et al., 2015</li><li>Aprende projeções W<sub>q</sub>, W<sub>k</sub>, v</li><li><b>+8.256 parâmetros</b></li></ul>
+        </div>
+        <div class="col">
+          <div class="tag-sdp" style="font-size:1.2em">Cenário 2 · Produto escalar</div>
+          <div class="eq">score<sub>i</sub> = (h<sub>T</sub> · h<sub>i</sub>) / √d</div>
+          <ul><li>Vaswani et al., 2017</li><li>Similaridade direta entre vetores</li><li><b>0 parâmetros extras</b></li></ul>
+        </div>
+      </div>
+      <div style="text-align:center;color:var(--slide-muted);margin-top:.4em">Em ambos: pesos α = softmax(score) · contexto = Σ α<sub>i</sub> h<sub>i</sub></div>
+      <div class="footer"><span>Detecção de Spam · LSTM + Atenção</span><span>6</span></div>
+    </div>
+    <div class="details">
+      <div><h4>Conteúdo</h4>As equações de score dos dois mecanismos, lado a lado, com a diferença de parâmetros. h<sub>T</sub> = último estado válido da LSTM (query); h<sub>i</sub> = estados da sequência (keys/values).</div>
+      <div><h4>Fonte</h4><div class="src"><code>src/models/attention.py</code><code>docs/metodologia.md §4.2</code></div></div>
+      <div><h4>Fala sugerida</h4><div class="say">“A aditiva aprende como comparar; o produto escalar compara direto. É o slide central — vale ir devagar.”</div></div>
+    </div>
+  </article>
+
+  <!-- 7 -->
+  <article class="slide-entry" id="s7">
+    <div class="entry-head"><span class="num">07</span><h3>Arquitetura</h3><span class="time">≈ 50 s</span></div>
+    <div class="slide">
+      <div class="s-title">Arquitetura do modelo</div>
+      <div class="s-body" style="flex-direction:column;justify-content:center;gap:1em">
+        <div class="flow" style="justify-content:center">
+          <span>Tokens<br><em>≤ 100</em></span><em>→</em>
+          <span>Embedding<br><em>64-d, mask</em></span><em>→</em>
+          <span>LSTM<br><em>64 un.</em></span><em>→</em>
+          <span style="border-color:#1f77b4;border-width:2px">Atenção<br><em><span class="tag-add">adit.</span> / <span class="tag-sdp">prod.</span></em></span><em>→</em>
+          <span>Dropout<br><em>0,2</em></span><em>→</em>
+          <span>Dense<br><em>sigmoid</em></span>
+        </div>
+        <table style="max-width:70%;margin:0 auto">
+          <tr><th>Otimizador</th><td>Adam, lr = 0,001</td><th>Batch</th><td>32</td></tr>
+          <tr><th>Perda</th><td>Entropia cruzada binária</td><th>Épocas</th><td>≤ 20</td></tr>
+          <tr><th>Early stopping</th><td>val_loss, paciência 3</td><th>Limiar</th><td>0,5</td></tr>
+        </table>
+      </div>
+      <div class="footer"><span>Detecção de Spam · LSTM + Atenção</span><span>7</span></div>
+    </div>
+    <div class="details">
+      <div><h4>Conteúdo</h4>Fluxo da rede (desenhe com formas do PowerPoint) e hiperparâmetros. Destaque visual apenas no bloco de atenção.</div>
+      <div><h4>Fonte</h4><div class="src"><code>configs/experiment.yaml</code><code>src/models/classifier.py</code></div></div>
+      <div><h4>Fala sugerida</h4><div class="say">“Tudo é idêntico entre os cenários, exceto a caixa destacada.”</div></div>
+    </div>
+  </article>
+
+  <!-- 8 -->
+  <article class="slide-entry" id="s8">
+    <div class="entry-head"><span class="num">08</span><h3>Protocolo experimental</h3><span class="time">≈ 60 s</span></div>
+    <div class="slide">
+      <div class="s-title">30 simulações pareadas</div>
+      <div class="s-body">
+        <div class="col">
+          <p style="margin:0">Para cada semente <b>k ∈ {1001, …, 1030}</b>:</p>
+          <ol style="margin:0;padding-left:1.3em">
+            <li>Mesmos pesos iniciais em Embedding, LSTM e saída</li>
+            <li>Mesma ordem de lotes de treino</li>
+            <li>Treina <span class="tag-add">aditiva</span> e <span class="tag-sdp">produto escalar</span></li>
+            <li>Avalia os dois no mesmo conjunto de teste</li>
+          </ol>
+        </div>
+        <div class="col" style="justify-content:center;align-items:center;text-align:center">
+          <div class="big">30 × 2</div>
+          <div>= 60 treinamentos</div>
+          <div class="box" style="margin-top:.6em">Diferença pareada<br><span class="eq">d<sub>k</sub> = F1<sub>adit,k</sub> − F1<sub>prod,k</sub></span></div>
+        </div>
+      </div>
+      <div class="footer"><span>Detecção de Spam · LSTM + Atenção</span><span>8</span></div>
+    </div>
+    <div class="details">
+      <div><h4>Conteúdo</h4>Por que o desenho é pareado: cada par só difere no mecanismo de atenção, o que reduz o ruído e permite testes pareados.</div>
+      <div><h4>Fonte</h4><div class="src"><code>docs/metodologia.md §6</code><code>src/train.py</code></div></div>
+      <div><h4>Fala sugerida</h4><div class="say">“Se a semente favorece um modelo, favorece o outro também. Assim a diferença medida é do mecanismo, não da sorte.”</div></div>
+    </div>
+  </article>
+
+  <!-- 9 -->
+  <article class="slide-entry" id="s9">
+    <div class="entry-head"><span class="num">09</span><h3>Análise estatística</h3><span class="time">≈ 50 s</span></div>
+    <div class="slide">
+      <div class="s-title">Como decidimos entre H₀ e H₁</div>
+      <div class="s-body" style="flex-direction:column;gap:.8em">
+        <div class="flow" style="justify-content:center">
+          <span>30 diferenças d<sub>k</sub></span><em>→</em>
+          <span>Shapiro-Wilk<br><em>normal?</em></span><em>→</em>
+          <span><b>sim:</b> t pareado<br><b>não:</b> Wilcoxon</span><em>→</em>
+          <span>p &lt; 0,05?<br><em>rejeita H₀</em></span>
+        </div>
+        <div class="col" style="flex-direction:row;gap:4%">
+          <div class="box" style="flex:1"><b>Tamanho de efeito</b><br>d de Cohen (d<sub>z</sub>) e rank-biserial</div>
+          <div class="box" style="flex:1"><b>Robustez</b><br>Teste de permutação (10.000) e IC 95 % bootstrap</div>
+        </div>
+      </div>
+      <div class="footer"><span>Detecção de Spam · LSTM + Atenção</span><span>9</span></div>
+    </div>
+    <div class="details">
+      <div><h4>Conteúdo</h4>A regra de decisão definida <b>antes</b> de ver os dados.</div>
+      <div><h4>Fonte</h4><div class="src"><code>src/stat_tests.py</code><code>docs/metodologia.md §8</code></div></div>
+      <div><h4>Fala sugerida</h4><div class="say">“O teste é escolhido pela normalidade das diferenças. A permutação confirma o resultado sem supor distribuição nenhuma.”</div></div>
+    </div>
+  </article>
+
+  <!-- 10 -->
+  <article class="slide-entry" id="s10">
+    <div class="entry-head"><span class="num">10</span><h3>Resultados — métricas</h3><span class="time">≈ 60 s</span></div>
+    <div class="slide">
+      <div class="s-title">Resultados (média ± dp, 30 sementes)</div>
+      <div class="s-body">
+        <div class="col">
+          <table>
+            <tr><th>Métrica</th><th class="tag-add">Aditiva</th><th class="tag-sdp">Prod. escalar</th></tr>
+            <tr><td><b>F1 (spam)</b></td><td><span class="ph">0,0000 ± 0,0000</span></td><td><span class="ph">0,0000 ± 0,0000</span></td></tr>
+            <tr><td>Precisão</td><td><span class="ph">…</span></td><td><span class="ph">…</span></td></tr>
+            <tr><td>Recall</td><td><span class="ph">…</span></td><td><span class="ph">…</span></td></tr>
+            <tr><td>Acurácia</td><td><span class="ph">…</span></td><td><span class="ph">…</span></td></tr>
+          </table>
+        </div>
+        <div class="col"><div class="fig"><div><b>metrics_summary.png</b>results/figures/campaign_full_30/</div></div></div>
+      </div>
+      <div class="footer"><span>Detecção de Spam · LSTM + Atenção</span><span>10</span></div>
+    </div>
+    <div class="details">
+      <div><h4>Preencher com</h4>
+        <ul class="tight">
+          <li>F1: <code>json.primary.descriptive.additive.mean/std</code> e <code>…scaled_dot_product.mean/std</code></li>
+          <li>Demais: <code>json.secondary.&lt;métrica&gt;.descriptive</code> (precision_spam, recall_spam, accuracy)</li>
+        </ul>
+      </div>
+      <div><h4>Fala sugerida</h4><div class="say">“Esta é a visão geral. A pergunta estatística está no F1, na primeira linha.”</div></div>
+    </div>
+  </article>
+
+  <!-- 11 -->
+  <article class="slide-entry" id="s11">
+    <div class="entry-head"><span class="num">11</span><h3>Distribuição do F1</h3><span class="time">≈ 50 s</span></div>
+    <div class="slide">
+      <div class="s-title">F1 por simulação e diferenças pareadas</div>
+      <div class="s-body">
+        <div class="col"><div class="fig"><div><b>f1_comparison.png</b>boxplot (esq.) + histograma de ΔF1 (dir.)<br>results/figures/campaign_full_30/</div></div></div>
+      </div>
+      <div style="margin-top:.4em">Diferença média ΔF1 = <span class="ph">json.primary.descriptive.difference.mean</span></div>
+      <div class="footer"><span>Detecção de Spam · LSTM + Atenção</span><span>11</span></div>
+    </div>
+    <div class="details">
+      <div><h4>Conteúdo</h4>Figura em largura total. Uma linha de texto com a diferença média.</div>
+      <div><h4>Como ler</h4>Se o histograma estiver centrado em zero, os mecanismos empatam; se deslocado para a direita, a aditiva é melhor; para a esquerda, o produto escalar.</div>
+      <div><h4>Fala sugerida</h4><div class="say">“Cada ponto é uma semente. À direita, a diferença par a par.”</div></div>
+    </div>
+  </article>
+
+  <!-- 12 -->
+  <article class="slide-entry" id="s12">
+    <div class="entry-head"><span class="num">12</span><h3>Teste de hipótese</h3><span class="time">≈ 75 s</span></div>
+    <div class="slide">
+      <div class="s-title">H₀ ou H₁?</div>
+      <div class="s-body">
+        <div class="col">
+          <table>
+            <tr><th>Shapiro-Wilk (p)</th><td><span class="ph">json.primary.normality.p_value</span></td></tr>
+            <tr><th>Teste aplicado</th><td><span class="ph">decision.selected_test</span></td></tr>
+            <tr><th>p-valor</th><td><span class="ph">decision.p_value</span></td></tr>
+            <tr><th>IC 95 % de ΔF1</th><td><span class="ph">paired_t_test.ci_lower / ci_upper</span></td></tr>
+            <tr><th>d de Cohen</th><td><span class="ph">effect_size.cohens_dz</span> (<span class="ph">label</span>)</td></tr>
+            <tr><th>Permutação (p)</th><td><span class="ph">permutation_test.p_value</span></td></tr>
+          </table>
+          <div class="box" style="text-align:center"><div class="big" style="font-size:1.6em"><span class="ph">decision.conclusion</span></div></div>
+        </div>
+        <div class="col" style="flex:.7"><div class="fig"><div><b>qq_f1_differences.png</b>apoio à escolha do teste</div></div></div>
+      </div>
+      <div class="footer"><span>Detecção de Spam · LSTM + Atenção</span><span>12</span></div>
+    </div>
+    <div class="details">
+      <div><h4>Preencher com</h4>Todos os campos sob <code>json.primary</code>. Se <code>decision.better_scenario</code> não for nulo, diga qual cenário foi melhor.</div>
+      <div class="note"><b>Cuidado com a frase.</b> Se não rejeitar H₀: diga <i>“não encontramos evidência de diferença”</i> — <b>não</b> “os modelos são iguais”. Se rejeitar: comente o tamanho do efeito (<code>practical_magnitude</code>), não só o p-valor.</div>
+      <div><h4>Fala sugerida</h4><div class="say">“As diferenças <span class="mono">[foram/não foram]</span> normais, então usamos <span class="mono">[t/Wilcoxon]</span>. Com p = …, <span class="mono">[rejeitamos/não rejeitamos]</span> H₀.”</div></div>
+    </div>
+  </article>
+
+  <!-- 13 -->
+  <article class="slide-entry" id="s13">
+    <div class="entry-head"><span class="num">13</span><h3>Custo computacional</h3><span class="time">≈ 45 s</span></div>
+    <div class="slide">
+      <div class="s-title">Tempo de treino</div>
+      <div class="s-body">
+        <div class="col" style="justify-content:center;text-align:center">
+          <div class="tag-add">Aditiva</div><div class="big"><span class="ph">00,0 s</span></div>
+          <div class="tag-sdp" style="margin-top:.6em">Produto escalar</div><div class="big"><span class="ph">00,0 s</span></div>
+        </div>
+        <div class="col">
+          <ul>
+            <li>Média por treinamento, CPU</li>
+            <li>Diferença: <span class="ph">Δ s</span> (p = <span class="ph">…</span>)</li>
+            <li>Parâmetros extras: <span class="tag-add">+8.256</span> vs. <span class="tag-sdp">0</span></li>
+            <li>Épocas até a parada: <span class="ph">média</span></li>
+          </ul>
+          <div class="fig"><div><b>Opcional</b>boxplot de <code>train_time_s</code> por cenário</div></div>
+        </div>
+      </div>
+      <div class="footer"><span>Detecção de Spam · LSTM + Atenção</span><span>13</span></div>
+    </div>
+    <div class="details">
+      <div><h4>Preencher com</h4><code>json.secondary.train_time_s</code> (descriptive e decision) e médias de <code>total_epochs</code> em <code>metrics.csv</code>.</div>
+      <div><h4>Fala sugerida</h4><div class="say">“Além da qualidade, vale olhar o custo: o mecanismo mais simples treina mais rápido?”</div></div>
+    </div>
+  </article>
+
+  <!-- 14 -->
+  <article class="slide-entry" id="s14">
+    <div class="entry-head"><span class="num">14</span><h3>Limitações</h3><span class="time">≈ 40 s</span></div>
+    <div class="slide">
+      <div class="s-title">Limitações</div>
+      <div class="s-body">
+        <div class="col">
+          <ul>
+            <li>Uma única divisão treino/val/teste: as 30 repetições medem a variabilidade do treino, não de novas amostras de mensagens</li>
+            <li>Base pequena, em inglês, de 2011</li>
+            <li>Não rejeitar H₀ ≠ provar equivalência</li>
+            <li>Execução em CPU; tempos dependem do hardware</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer"><span>Detecção de Spam · LSTM + Atenção</span><span>14</span></div>
+    </div>
+    <div class="details">
+      <div><h4>Fonte</h4><div class="src"><code>docs/metodologia.md §8.6</code><code>json.limitations</code></div></div>
+      <div><h4>Fala sugerida</h4><div class="say">“Mostrar as limitações mostra que entendemos até onde o resultado vale.”</div></div>
+    </div>
+  </article>
+
+  <!-- 15 -->
+  <article class="slide-entry" id="s15">
+    <div class="entry-head"><span class="num">15</span><h3>Conclusão</h3><span class="time">≈ 45 s</span></div>
+    <div class="slide">
+      <div class="s-title">Conclusão</div>
+      <div class="s-body">
+        <div class="col">
+          <div class="box"><b>Resposta à pergunta</b><br><span class="ph">Rejeitamos / não rejeitamos H₀ — frase do slide 12</span></div>
+          <ul>
+            <li>Qualidade: <span class="ph">qual cenário / empate</span></li>
+            <li>Custo: <span class="ph">qual cenário treina mais rápido</span></li>
+            <li>Recomendação prática: <span class="ph">…</span></li>
+          </ul>
+        </div>
+        <div class="col">
+          <div class="box"><b>Trabalhos futuros</b>
+            <ul><li>Validação cruzada (várias divisões)</li><li>Embeddings pré-treinados (GloVe)</li><li>Outras bases / português</li></ul>
+          </div>
+          <div style="text-align:center;margin-top:auto" class="big">Perguntas?</div>
+        </div>
+      </div>
+      <div class="footer"><span>Detecção de Spam · LSTM + Atenção</span><span>15</span></div>
+    </div>
+    <div class="details">
+      <div><h4>Conteúdo</h4>Resposta direta à pergunta do slide 3, recomendação prática e próximos passos. Pode juntar com um slide final de referências (Almeida 2011, Bahdanau 2015, Vaswani 2017).</div>
+      <div><h4>Fala sugerida</h4><div class="say">“Respondendo à pergunta do início: …”</div></div>
+    </div>
+  </article>
+</section>
+
+<!-- ═════════════════════════ CHECKLIST ═════════════════════════ -->
+<section class="block" id="checklist">
+  <h2>4. Checklist antes de apresentar</h2>
+  <div class="card checklist">
+    <label><input type="checkbox"> Campanha <code>campaign_full_30</code> concluída (60 linhas no <code>metrics.csv</code>)</label>
+    <label><input type="checkbox"> <code>analyze_results.py</code> executado e figuras geradas em <code>results/figures/campaign_full_30/</code></label>
+    <label><input type="checkbox"> Todos os espaços reservados amarelos substituídos por valores do JSON</label>
+    <label><input type="checkbox"> Números dos slides iguais aos do relatório IEEE</label>
+    <label><input type="checkbox"> Azul = aditiva e laranja = produto escalar em todos os slides</label>
+    <label><input type="checkbox"> Frase sobre H₀ revisada (sem “os modelos são iguais”)</label>
+    <label><input type="checkbox"> Ensaio cronometrado: 12–15 min</label>
+    <label><input type="checkbox"> Slides salvos em <code>docs/apresentacao/</code> (.pptx e .pdf)</label>
+  </div>
+</section>
+
+</div>
+
+<button class="theme-btn" type="button" id="themeBtn" aria-label="Alternar tema">◐ Tema</button>
+<script>
+  (function () {
+    var root = document.documentElement;
+    var btn = document.getElementById('themeBtn');
+    try {
+      var saved = localStorage.getItem('guia-slide-theme');
+      if (saved) root.setAttribute('data-theme', saved);
+    } catch (e) {}
+    btn.addEventListener('click', function () {
+      var cur = root.getAttribute('data-theme');
+      if (!cur) cur = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      var next = cur === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('guia-slide-theme', next); } catch (e) {}
+    });
+
+    // Checklist persists per browser
+    var boxes = document.querySelectorAll('.checklist input');
+    boxes.forEach(function (box, i) {
+      try { box.checked = localStorage.getItem('guia-slide-chk-' + i) === '1'; } catch (e) {}
+      box.addEventListener('change', function () {
+        try { localStorage.setItem('guia-slide-chk-' + i, box.checked ? '1' : '0'); } catch (e) {}
+      });
+    });
+  })();
+</script>
+</body>
+</html>

@@ -194,7 +194,19 @@ Para cada semente `k` ∈ {1001, …, 1030}:
 
 A diferença pareada é definida como: **d_i = F1_aditiva_i − F1_produto_i**
 
-### 8.2 Teste de Permutação Pareado
+### 8.2 Regra de Decisão (pré-especificada)
+
+Implementada em `src/stat_tests.py` (`compare_paired`), com nível de significância α = 0,05:
+
+1. **Normalidade:** teste de Shapiro-Wilk sobre as 30 diferenças `d_i` (apoiado por um gráfico Q-Q).
+2. **Teste principal:**
+   - Se Shapiro-Wilk **não** rejeitar a normalidade (p ≥ α) → **teste t de Student pareado** (bilateral), com IC 95 % da diferença média.
+   - Caso contrário → **teste de Wilcoxon dos postos sinalizados** (bilateral; diferenças nulas descartadas).
+3. **Decisão:** rejeitar H₀ se o p-valor do teste principal for < α. Nesse caso, o sinal da diferença média indica a abordagem mais eficaz (maior F1).
+4. **Tamanho de efeito:** d de Cohen para amostras pareadas (`d_z = média(d) / dp(d)`) e correlação rank-biserial pareada.
+5. **Verificações de robustez** (livres de distribuição): teste de permutação pareado e IC bootstrap (ver 8.3 e 8.4). O relatório indica se a permutação concorda com a decisão do teste principal.
+
+### 8.3 Teste de Permutação Pareado
 
 Teste bilateral por troca de sinais dentro de cada par:
 - Para cada permutação: multiplicar cada `d_i` por um sinal aleatório (+1 ou −1)
@@ -202,13 +214,17 @@ Teste bilateral por troca de sinais dentro de cada par:
 - p-valor: proporção de permutações onde `|média_permutada| ≥ |média_observada|`
 - Semente: 42; número de reamostragens: 10.000 (configurável)
 
-### 8.3 Intervalo de Confiança Bootstrap
+### 8.4 Intervalo de Confiança Bootstrap
 
 - Bootstrap dos pares (re-amostragem com reposição)
 - IC de 95 % pelo método dos percentis
 - 10.000 reamostras
 
-### 8.4 Limitações
+### 8.5 Métricas Secundárias
+
+Precisão, recall, acurácia, average precision e tempo de treino passam pelo mesmo procedimento (para o tempo, menor é melhor). Essa análise é **exploratória**: não há correção para comparações múltiplas e ela não altera a conclusão sobre H₀, que se baseia apenas no F1.
+
+### 8.6 Limitações
 
 1. As 30 repetições partilham uma **única divisão** treino/validação/teste. Medem variabilidade da inicialização e da ordem dos lotes, não amostras independentes da população de mensagens. Os resultados não podem ser generalizados directamente além deste conjunto de dados e desta divisão.
 2. **Não rejeitar H₀ não comprova equivalência.** Um teste de equivalência (e.g., TOST) seria necessário para afirmar equivalência.
@@ -216,9 +232,9 @@ Teste bilateral por troca de sinais dentro de cada par:
 
 ---
 
-## 9. Pendências Académicas
+## 9. Técnicas Avaliadas
 
-> **Pendência:** a aceitação de **embeddings treináveis** como técnica separada (distinta da LSTM) ainda precisa de ser confirmada com a professora da disciplina. O estudo está estruturado para ter três técnicas (embeddings, LSTM, atenção), mas essa classificação não foi formalmente validada. Esta documentação não deve ser interpretada como confirmação de que o requisito já foi satisfeito.
+O estudo usa três técnicas: **embeddings treináveis (A)**, **LSTM (B)** e **atenção (C)**, sendo C a técnica variada entre os cenários (aditiva vs. produto escalar escalado). A classificação de embeddings como técnica separada da LSTM foi **confirmada com a professora da disciplina em 03/11/2026**.
 
 ---
 
@@ -227,3 +243,6 @@ Teste bilateral por troca de sinais dentro de cada par:
 - Almeida, T.A., Hidalgo, J.M.G., Yamakami, A. (2011). Contributions to the Study of SMS Spam Filtering. *DOCENG '11*.
 - Bahdanau, D., Cho, K., Bengio, Y. (2015). Neural Machine Translation by Jointly Learning to Align and Translate. *ICLR 2015*.
 - Vaswani, A. et al. (2017). Attention Is All You Need. *NeurIPS 2017*.
+- Shapiro, S.S., Wilk, M.B. (1965). An Analysis of Variance Test for Normality (Complete Samples). *Biometrika*, 52(3/4).
+- Wilcoxon, F. (1945). Individual Comparisons by Ranking Methods. *Biometrics Bulletin*, 1(6).
+- Cohen, J. (1988). *Statistical Power Analysis for the Behavioral Sciences* (2nd ed.). Lawrence Erlbaum.

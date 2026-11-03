@@ -1,0 +1,122 @@
+{
+  "run_id": "campaign_full_30",
+  "mode": "full",
+  "start_time": "2026-11-03T16:30:31.849531+00:00",
+  "end_time": "2026-11-03T16:59:15.182972+00:00",
+  "config": {
+    "split": {
+      "seed": 42,
+      "train_ratio": 0.7,
+      "val_ratio": 0.15,
+      "test_ratio": 0.15
+    },
+    "preprocessing": {
+      "max_vocab_size": 10000,
+      "max_length": 100
+    },
+    "model": {
+      "embedding_dim": 64,
+      "lstm_units": 64,
+      "attention_dim": 64,
+      "dropout_rate": 0.2
+    },
+    "training": {
+      "seeds": [
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010,
+        1011,
+        1012,
+        1013,
+        1014,
+        1015,
+        1016,
+        1017,
+        1018,
+        1019,
+        1020,
+        1021,
+        1022,
+        1023,
+        1024,
+        1025,
+        1026,
+        1027,
+        1028,
+        1029,
+        1030
+      ],
+      "batch_size": 32,
+      "max_epochs": 20,
+      "optimizer": "adam",
+      "learning_rate": 0.001,
+      "loss": "binary_crossentropy",
+      "early_stopping": {
+        "monitor": "val_loss",
+        "patience": 3,
+        "restore_best_weights": true
+      },
+      "class_weight": null
+    },
+    "evaluation": {
+      "threshold": 0.5
+    },
+    "statistical_analysis": {
+      "significance_level": 0.05,
+      "n_permutations": 10000,
+      "bootstrap_n_samples": 10000,
+      "bootstrap_ci": 0.95,
+      "seed": 42
+    },
+    "pilot": {
+      "n_pairs": 3,
+      "max_epochs": 5
+    }
+  },
+  "data_hash": "sha256:55341228082b25b832a5868a5ab4b038142a57f70c676c123280af6ff457fe46",
+  "tf_version": "2.15.0",
+  "python_version": "3.11.9",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "gpu_available": false,
+  "gpu_devices": [],
+  "determinism_enabled": true,
+  "seeds_this_run": [
+    1001,
+    1002,
+    1003,
+    1004,
+    1005,
+    1006,
+    1007,
+    1008,
+    1009,
+    1010,
+    1011,
+    1012,
+    1013,
+    1014,
+    1015,
+    1016,
+    1017,
+    1018,
+    1019,
+    1020,
+    1021,
+    1022,
+    1023,
+    1024,
+    1025,
+    1026,
+    1027,
+    1028,
+    1029,
+    1030
+  ]
+}
